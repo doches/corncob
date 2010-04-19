@@ -1,0 +1,22 @@
+Corncob
+-------
+
+Corncob is a collection of C classes (yep, you read that right) for building probabilistic models based on
+corpus counts, and other compling-y things. It includes homebrew utilities for all kinds of things, including:
+
+ +   C-string to integer maps
+ +   integer to integer maps
+ +   Sparse count vectors
+ +   Wordmaps
+ +   Task-specific linked lists
+
+As well as full-blown implementations built on these tools for a growing number of existing models, including:
+
+ +   Blei et al.'s Latent Dirichlet Allocation (lda)
+ +   Anderson's Rational Model of Categorization (rmc)
+ 
+I'm not claiming that any of this is good design, by the way. I'd probably be better off using C++ and the STL, 
+or maybe Boost, or something -- but this way lets me exercise some rusty data-structures-and-algorithms parts of my
+brain, and gets my C hackery back up to speed. Good times.
+
+UML-type documentation for these classes can be generated using [crud](http://github.com/doches/crud).
