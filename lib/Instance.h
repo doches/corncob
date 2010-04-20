@@ -12,3 +12,4 @@ typedef struct _Instance
 
 Instance *Instance_new(unsigned int w_i,unsigned int z_i, unsigned int d_i, unsigned int index,char *word);
 void Instance_free(Instance *list);
+void Instance_print(Instance *list);

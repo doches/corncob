@@ -7,6 +7,7 @@
  *
  */
 #include "Instance.h"
+#include <stdio.h>
 
 Instance *Instance_new(unsigned int w_i,unsigned int z_i, unsigned int d_i, unsigned int index,char *word)
 {
@@ -29,4 +30,9 @@ void Instance_free(Instance *list)
 		free(list);
 		list = next;
 	}
+}
+
+void Instance_print(Instance *i)
+{
+	printf("[%3d: %3d %3d %3d %-10.10s]\n",i->index,i->w_i,i->z_i,i->d_i,i->word);
 }
