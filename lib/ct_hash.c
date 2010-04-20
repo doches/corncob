@@ -40,7 +40,7 @@ ct_hash *hash_new(unsigned int buckets)
 // Internal hash function
 int ct_h_hash(unsigned int key,int interval)
 {
-//	key = (key >> 0) * 2654435761;
+	key = (key >> 0) * 2654435761;
 //	return key % interval;
 	return key % interval;
 }
@@ -107,6 +107,7 @@ void hash_foreach(ct_hash *map,void (*callback)(hash_element *))
 hash_element *hash_get(ct_hash *map, int key)
 {
 	unsigned int index = ct_h_hash(key, map->num_buckets);
+//	printf("[hash]: %d hashes to %d\n",key,index);
 	hash_element *element = map->buckets[index];
 	if (element) {
 		while (element && element->key != key) {
