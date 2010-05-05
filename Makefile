@@ -2,16 +2,21 @@
 
 CC = gcc
 CFLAGS = -g -std=c99 -Wall -I lib/
-
+EXECUTABLES = lda rmc wordcount ctools_test
 HEADERS = lib/corpus.h lib/ct_hash.h lib/SparseCounts.h lib/word_hash.h lib/WordMap.h tools/lda.h tools/rmc.h
 
 # Test target (default)
-test: ct_hash_test.o word_hash_test.o corpus_test.o SparseCounts_test.o WordMap_test.o test.o
-	$(CC) $(CFLAGS) test.o word_hash_test.o ct_hash_test.o corpus_test.o SparseCounts_test.o WordMap_test.o WordMap.o word_hash.o ct_hash.o corpus.o SparseCounts.o -o ctools_test
+test: ct_hash_test.o word_hash_test.o corpus_test.o SparseCounts_test.o WordMap_test.o test.o context_corpus_test.o
+	$(CC) $(CFLAGS) test.o word_hash_test.o ct_hash_test.o corpus_test.o SparseCounts_test.o WordMap_test.o WordMap.o word_hash.o ct_hash.o corpus.o SparseCounts.o context_corpus.o context_corpus_test.o -o ctools_test
 	./ctools_test
+	
+ctools_test: test
 
 test.o: test/test.c test/test.h
 	$(CC) -c $(CFLAGS) test/test.c
+	
+context_corpus_test.o: context_corpus.o test/context_corpus_test.h test/context_corpus_test.c
+	$(CC) -c $(CFLAGS) test/context_corpus_test.c
 
 ct_hash_test.o: ct_hash.o test/ct_hash_test.c test/ct_hash_test.h
 	$(CC) -c $(CFLAGS) test/ct_hash_test.c
@@ -67,12 +72,19 @@ rmc: rmc.o SparseCounts.o corpus.o ct_hash.o word_hash.o WordMap.o Instance.o
 rmc.o: tools/rmc.h tools/rmc.c
 	$(CC) -c $(CFLAGS) tools/rmc.c
 
+# nLDA target
+context_corpus.o: lib/context_corpus.h lib/context_corpus.c
+	$(CC) -c $(CFLAGS) lib/context_corpus.c
+
 # Clean target
 clean:
 	rm -f *.o
 	rm -rf doc/
+	rm $(EXECUTABLES)
 
 # Doc target
 doc: lib/*.h tools/*.h
 	rm -rf doc/
 	crud
+
+all: $(EXECUTABLES) doc
