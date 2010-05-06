@@ -29,7 +29,7 @@ typedef struct _context_corpus_t
 
 context_corpus *context_corpus_new(char *filename);
 void context_corpus_free(context_corpus *corpus);
-//void context_corpus_each_document(context_corpus *corpus, void (*document_callback)(SparseCount *));
+void context_corpus_each_document(context_corpus *corpus, void (*document_callback)(unsigned int *,unsigned int));
 //void SparseCount
 
 #endif

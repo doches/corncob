@@ -58,16 +58,45 @@ context_corpus *context_corpus_new(char *filename)
 			new->items++;
 		} else {
 			unsigned int index = atoi((const char *)strtok(line,delim));
-			unsigned int value = atoi((const char *)strtok(line,delim));
+			unsigned int value = atoi((const char *)strtok(NULL,delim));
 			SparseCounts_add(doc->counts,index,value);
 			count--;
 			
-			if(value > max) {
-				max = value;
+			if(index > max) {
+				max = index;
 			}
 		}
 	}
 	new->dims = max;
-	
 	return new;
 }
+
+void context_corpus_each_document(context_corpus *corpus, void (*document_callback)(unsigned int *, unsigned int))
+{
+	for(int doc=0;doc<=corpus->dims;doc++) {
+		context_corpus_d *list = corpus->list;
+		unsigned int docsize = 64;
+		unsigned int *document = malloc(sizeof(unsigned int *)*docsize);
+		unsigned int docindex = 0;
+		unsigned int w_i = 0;
+		while(list != NULL) {
+			for(int i=0;i<SparseCounts_getValue(list->counts,doc);i++) {
+				document[docindex++] = w_i;
+				if(docindex >= docsize) {
+					unsigned int *newdoc = malloc(sizeof(unsigned int *)*(docsize*2));
+					memcpy(newdoc,document,docsize);
+					docsize *= 2;
+					free(document);
+					document = newdoc;
+				}
+			}
+			list = list->next;
+			w_i++;
+		}
+
+		(*document_callback)(document,docindex);
+		
+		free(document);
+	}
+}
+
