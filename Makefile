@@ -3,7 +3,7 @@
 CC = gcc
 CFLAGS = -g -std=c99 -Wall -I lib/
 EXECUTABLES = lda rmc wordcount ctools_test
-HEADERS = lib/corpus.h lib/ct_hash.h lib/SparseCounts.h lib/word_hash.h lib/WordMap.h tools/lda.h tools/rmc.h
+HEADERS = lib/corpus.h lib/ct_hash.h lib/SparseCounts.h lib/word_hash.h lib/WordMap.h tools/lda.h tools/rmc.h lib/count_list.h lib/context_corpus.h
 
 # Test target (default)
 test: ct_hash_test.o word_hash_test.o corpus_test.o SparseCounts_test.o WordMap_test.o test.o context_corpus_test.o
@@ -66,11 +66,14 @@ WordMap.o: lib/WordMap.h lib/WordMap.c
 	$(CC) -c $(CFLAGS) lib/WordMap.c
 
 # RMC target
-rmc: rmc.o SparseCounts.o corpus.o ct_hash.o word_hash.o WordMap.o Instance.o
-	$(CC) $(CFLAGS) WordMap.o SparseCounts.o word_hash.o ct_hash.o corpus.o rmc.o Instance.o -o rmc
+rmc: rmc.o SparseCounts.o corpus.o ct_hash.o word_hash.o WordMap.o Instance.o count_list.o
+	$(CC) $(CFLAGS) WordMap.o SparseCounts.o word_hash.o ct_hash.o corpus.o rmc.o Instance.o count_list.o -o rmc
 
 rmc.o: tools/rmc.h tools/rmc.c
 	$(CC) -c $(CFLAGS) tools/rmc.c
+
+count_list.o: lib/count_list.h lib/count_list.c
+	$(CC) -c $(CFLAGS) lib/count_list.c
 
 # nLDA target
 context_corpus.o: lib/context_corpus.h lib/context_corpus.c

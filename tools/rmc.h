@@ -4,21 +4,11 @@
 #include "SparseCounts.h"
 #include "WordMap.h"
 #include "Instance.h"
+#include "count_list.h"
 #include <stdlib.h>
 #include <time.h>
 
-#define COUNT_LIST_BUCKETS 400
 #define WORDMAP_BUCKETS 1000
-
-typedef struct t_count_list
-{
-	SparseCounts *counts;
-	struct t_count_list *next;
-} count_list;
-
-count_list *count_list_new();
-void count_list_free(count_list *);
-SparseCounts *count_list_get(count_list *,unsigned int);
 
 typedef struct t_RMC
 {
