@@ -1,9 +1,9 @@
 # Makefile for lda-c and assorted tools (int->int hash, string->int hash, sparsecount, etc.)
 
 CC = gcc
-CFLAGS = -g -std=c99 -Wall -I lib/
-EXECUTABLES = lda rmc wordcount ctools_test
-HEADERS = lib/corpus.h lib/ct_hash.h lib/SparseCounts.h lib/word_hash.h lib/WordMap.h tools/lda.h tools/rmc.h lib/count_list.h lib/context_corpus.h
+CFLAGS = -g -std=c99 -Wall -I lib/ -I vendor/include/ -I tools/
+EXECUTABLES = lda rmc wordcount ctools_test nlda
+HEADERS = lib/corpus.h lib/ct_hash.h lib/SparseCounts.h lib/word_hash.h lib/WordMap.h tools/lda.h tools/rmc.h lib/count_list.h lib/context_corpus.h vendor/include/progressbar.h tools/nlda.h
 
 # Test target (default)
 test: ct_hash_test.o word_hash_test.o corpus_test.o SparseCounts_test.o WordMap_test.o test.o context_corpus_test.o
@@ -78,6 +78,15 @@ count_list.o: lib/count_list.h lib/count_list.c
 # nLDA target
 context_corpus.o: lib/context_corpus.h lib/context_corpus.c
 	$(CC) -c $(CFLAGS) lib/context_corpus.c
+	
+progressbar.o: vendor/lib/progressbar.c vendor/include/progressbar.h
+	$(CC) -c $(CFLAGS) vendor/lib/progressbar.c
+
+nlda.o: tools/nlda.h tools/nlda.c
+	$(CC) -c $(CFLAGS) tools/nlda.c
+
+nlda: context_corpus.o progressbar.o nlda.o WordMap.o SparseCounts.o ct_hash.o word_hash.o Instance.o count_list.o
+	$(CC) $(CFLAGS) WordMap.o SparseCounts.o word_hash.o ct_hash.o Instance.o count_list.o context_corpus.o progressbar.o nlda.o -o nlda
 
 # Clean target
 clean:

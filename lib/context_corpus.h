@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include "SparseCounts.h"
 
+// A list of labeled sparsecounts -- each context_corpus_d is one row in the sparsevector file
 typedef struct _context_corpus_d_t
 {
 	SparseCounts *counts;
@@ -19,17 +20,31 @@ typedef struct _context_corpus_d_t
 context_corpus_d *context_corpus_d_new();
 void context_corpus_d_free(context_corpus_d *document);
 
+// A list of corpus 'documents' -- each context_corpus_edoc is one column in the sparsevector file
+typedef struct _context_corpus_edoc_t
+{
+	unsigned int *words;
+	unsigned int size;
+	struct _context_corpus_edoc_t *next;
+} context_corpus_edoc;
+
+context_corpus_edoc *context_corpus_edoc_new(unsigned int *words,unsigned int size);
+void context_corpus_edoc_free(context_corpus_edoc *edoc);
+
 typedef struct _context_corpus_t
 {
 	char *filename;
 	context_corpus_d *list;
 	unsigned long dims;
 	unsigned long items;
+	context_corpus_edoc *documents;
 } context_corpus;
 
 context_corpus *context_corpus_new(char *filename);
 void context_corpus_free(context_corpus *corpus);
 void context_corpus_each_document(context_corpus *corpus, void (*document_callback)(unsigned int *,unsigned int));
+void context_corpus_make_documents(context_corpus *corpus);
+void context_corpus_make_each_document(context_corpus *corpus);
 //void SparseCount
 
 #endif

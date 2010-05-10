@@ -14,6 +14,20 @@ void context_corpus_d_free(context_corpus_d *doc)
 	free(doc);
 }
 
+context_corpus_edoc *context_corpus_edoc_new(unsigned int *words, unsigned int size)
+{
+	context_corpus_edoc *new = malloc(sizeof(context_corpus_edoc));
+	new->words = words;
+	new->size = size;
+	return new;
+}
+
+void context_corpus_edoc_free(context_corpus_edoc *edoc)
+{
+	free(edoc->words);
+	free(edoc);
+}
+
 void context_corpus_free(context_corpus *corpus)
 {
 	context_corpus_d *doc = corpus->list;
@@ -22,6 +36,14 @@ void context_corpus_free(context_corpus *corpus)
 		prev = doc;
 		doc = doc->next;
 		context_corpus_d_free(prev);
+	}
+	if(corpus->documents != NULL) {
+		context_corpus_edoc *edoc;
+		while(corpus->documents != NULL) {
+			edoc = corpus->documents->next;
+			context_corpus_edoc_free(corpus->documents);
+			corpus->documents = edoc;
+		}
 	}
 	free(corpus);
 }
@@ -32,6 +54,7 @@ context_corpus *context_corpus_new(char *filename)
 	new->filename = filename;
 	new->list = NULL;
 	new->items = 0;
+	new->documents = NULL;
 	context_corpus_d *doc = NULL;
 	
 	unsigned int count = 0;
@@ -71,7 +94,16 @@ context_corpus *context_corpus_new(char *filename)
 	return new;
 }
 
-void context_corpus_each_document(context_corpus *corpus, void (*document_callback)(unsigned int *, unsigned int))
+void context_corpus_make_documents(context_corpus *corpus)
+{
+	if(corpus->documents != NULL) {
+		return; // Don't re-create the documents if we've got a cache already!
+	}
+	
+	context_corpus_make_each_document(corpus);
+}
+
+void context_corpus_make_each_document(context_corpus *corpus)
 {
 	for(int doc=0;doc<=corpus->dims;doc++) {
 		context_corpus_d *list = corpus->list;
@@ -93,10 +125,23 @@ void context_corpus_each_document(context_corpus *corpus, void (*document_callba
 			list = list->next;
 			w_i++;
 		}
-
-		(*document_callback)(document,docindex);
 		
-		free(document);
+		context_corpus_edoc *edoc = context_corpus_edoc_new(document,docindex);
+		if(corpus->documents == NULL) {
+			corpus->documents = edoc;
+		} else {
+			edoc->next = corpus->documents;
+			corpus->documents = edoc;
+		}
 	}
 }
 
+void context_corpus_each_document(context_corpus *corpus, void (*document_callback)(unsigned int *words, unsigned int size))
+{
+	context_corpus_make_documents(corpus);
+	context_corpus_edoc *edoc = corpus->documents;
+	while(edoc != NULL) {
+		(*document_callback)(edoc->words,edoc->size);
+		edoc = edoc->next;
+	}
+}
