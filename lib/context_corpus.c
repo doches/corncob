@@ -1,4 +1,5 @@
 #include "context_corpus.h"
+#include <assert.h>
 
 context_corpus_d *context_corpus_d_new()
 {
@@ -19,6 +20,7 @@ context_corpus_edoc *context_corpus_edoc_new(unsigned int *words, unsigned int s
 	context_corpus_edoc *new = malloc(sizeof(context_corpus_edoc));
 	new->words = words;
 	new->size = size;
+	new->next = NULL;
 	return new;
 }
 
@@ -55,6 +57,7 @@ context_corpus *context_corpus_new(char *filename)
 	new->list = NULL;
 	new->items = 0;
 	new->documents = NULL;
+	new->document_count = 0;
 	context_corpus_d *doc = NULL;
 	
 	unsigned int count = 0;
@@ -69,7 +72,11 @@ context_corpus *context_corpus_new(char *filename)
 		}
 		if(count <= 0) {
 			char *label = strtok(line,delim);
-			count = atoi((const char *)strtok(NULL,delim));
+			char *ct = strtok(NULL,delim);
+			if(label[0] < 'a' || label[0] > 'z') {
+				break;
+			}
+			count = atoi((const char *)ct);
 			if(doc == NULL) {
 				new->list = context_corpus_d_new();
 				doc = new->list;
@@ -77,6 +84,7 @@ context_corpus *context_corpus_new(char *filename)
 				doc->next = context_corpus_d_new();
 				doc = doc->next;
 			}
+			assert(label[0] >= 'a' && label[0] <= 'z');
 			doc->label = label;
 			new->items++;
 		} else {
@@ -105,18 +113,23 @@ void context_corpus_make_documents(context_corpus *corpus)
 
 void context_corpus_make_each_document(context_corpus *corpus)
 {
+	context_corpus_edoc *last = corpus->documents;
 	for(int doc=0;doc<=corpus->dims;doc++) {
 		context_corpus_d *list = corpus->list;
-		unsigned int docsize = 64;
+		unsigned int docsize = 32;
 		unsigned int *document = malloc(sizeof(unsigned int *)*docsize);
 		unsigned int docindex = 0;
 		unsigned int w_i = 0;
 		while(list != NULL) {
 			for(int i=0;i<SparseCounts_getValue(list->counts,doc);i++) {
-				document[docindex++] = w_i;
+				document[docindex] = w_i;
+				docindex++;
 				if(docindex >= docsize) {
 					unsigned int *newdoc = malloc(sizeof(unsigned int *)*(docsize*2));
-					memcpy(newdoc,document,docsize);
+					//memcpy(newdoc,document,docsize);
+					for(int k=0;k<docindex;k++) {
+						newdoc[k] = document[k];
+					}
 					docsize *= 2;
 					free(document);
 					document = newdoc;
@@ -126,12 +139,23 @@ void context_corpus_make_each_document(context_corpus *corpus)
 			w_i++;
 		}
 		
-		context_corpus_edoc *edoc = context_corpus_edoc_new(document,docindex);
-		if(corpus->documents == NULL) {
-			corpus->documents = edoc;
-		} else {
-			edoc->next = corpus->documents;
-			corpus->documents = edoc;
+		// Sanity check
+		for(int q=0;q<docindex;q++) {
+			if(document[q] > w_i) {
+				assert(document[q] <= w_i);
+			}
+		}
+		
+		if(docindex > 0) {
+			context_corpus_edoc *edoc = context_corpus_edoc_new(document,docindex);
+			if(corpus->documents == NULL) {
+				corpus->documents = edoc;
+				last = edoc;
+			} else {
+				last->next = edoc;
+				last = edoc;
+			}
+			corpus->document_count++;
 		}
 	}
 }

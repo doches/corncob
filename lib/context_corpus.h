@@ -38,6 +38,7 @@ typedef struct _context_corpus_t
 	unsigned long dims;
 	unsigned long items;
 	context_corpus_edoc *documents;
+	unsigned long document_count;
 } context_corpus;
 
 context_corpus *context_corpus_new(char *filename);

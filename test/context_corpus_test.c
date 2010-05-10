@@ -9,7 +9,7 @@
 
 #include "context_corpus_test.h"
 
-unsigned int cctotals[4] = {3,2,4,8};
+unsigned int cctotals[4] = {4,3,5,11};
 unsigned int cctotals_i = 0;
 void cc_each_doc(unsigned int *document, unsigned int docsize)
 {
@@ -26,10 +26,11 @@ void test_context_corpus()
 	context_corpus *corp = context_corpus_new("test/test.sparseline");
 	
 	assert(corp->dims == 3);
-	assert(corp->items == 2);
+	assert(corp->items == 3);
 	assert(corp->list != NULL);
 	assert(corp->list->next != NULL);
-	assert(corp->list->next->next == NULL);
+	assert(corp->list->next->next != NULL);
+	assert(corp->list->next->next->next == NULL);
 	
 	context_corpus_each_document(corp, &cc_each_doc);
 	
