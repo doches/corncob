@@ -114,6 +114,7 @@ void context_corpus_make_documents(context_corpus *corpus)
 void context_corpus_make_each_document(context_corpus *corpus)
 {
 	context_corpus_edoc *last = corpus->documents;
+	progressbar *progress = progressbar_new("Loading",corpus->dims);
 	for(int doc=0;doc<=corpus->dims;doc++) {
 		context_corpus_d *list = corpus->list;
 		unsigned int docsize = 32;
@@ -157,7 +158,9 @@ void context_corpus_make_each_document(context_corpus *corpus)
 			}
 			corpus->document_count++;
 		}
+		progressbar_inc(progress);
 	}
+	progressbar_finish(progress);
 }
 
 void context_corpus_each_document(context_corpus *corpus, void (*document_callback)(unsigned int *words, unsigned int size))

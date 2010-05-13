@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "SparseCounts.h"
+#include "progressbar.h"
 
 // A list of labeled sparsecounts -- each context_corpus_d is one row in the sparsevector file
 typedef struct _context_corpus_d_t
