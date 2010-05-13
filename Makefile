@@ -7,7 +7,7 @@ HEADERS = lib/corpus.h lib/ct_hash.h lib/SparseCounts.h lib/word_hash.h lib/Word
 
 # Test target (default)
 test: ct_hash_test.o word_hash_test.o corpus_test.o SparseCounts_test.o WordMap_test.o test.o context_corpus_test.o
-	$(CC) $(CFLAGS) test.o word_hash_test.o ct_hash_test.o corpus_test.o SparseCounts_test.o WordMap_test.o WordMap.o word_hash.o ct_hash.o corpus.o SparseCounts.o context_corpus.o context_corpus_test.o -o ctools_test
+	$(CC) $(CFLAGS) test.o word_hash_test.o ct_hash_test.o corpus_test.o SparseCounts_test.o WordMap_test.o WordMap.o word_hash.o ct_hash.o corpus.o SparseCounts.o context_corpus.o context_corpus_test.o progressbar.o -o ctools_test
 	./ctools_test
 	
 ctools_test: test
@@ -76,7 +76,7 @@ count_list.o: lib/count_list.h lib/count_list.c
 	$(CC) -c $(CFLAGS) lib/count_list.c
 
 # nLDA target
-context_corpus.o: lib/context_corpus.h lib/context_corpus.c
+context_corpus.o: lib/context_corpus.h lib/context_corpus.c progressbar.o
 	$(CC) -c $(CFLAGS) lib/context_corpus.c
 	
 progressbar.o: vendor/lib/progressbar.c vendor/include/progressbar.h
