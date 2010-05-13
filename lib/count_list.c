@@ -3,33 +3,49 @@
 count_list *count_list_new()
 {
 	count_list *new = malloc(sizeof(count_list));
-	new->counts = SparseCounts_new(COUNT_LIST_BUCKETS);
-	new->next = NULL;
+	new->size = COUNT_LIST_DEFAULT_SIZE;
+	new->counts = malloc(sizeof(SparseCounts *) * new->size);
+	new->used = 0;
+	count_list_add(new);
 	return new;
 }
 
 void count_list_free(count_list *list)
 {
-	count_list *next = NULL;
-	while(list != NULL) {
-		next = list->next;
-		SparseCounts_free(list->counts);
-		free(list);
-		list = next;
+	for(int i=0;i<list->used;i++) {
+		SparseCounts_free(list->counts[i]);
 	}
+	
+	free(list->counts);
+	free(list);
 }
 
-SparseCounts *count_list_get(count_list *start, unsigned int max)
+void count_list_resize(count_list *list)
 {
-	int current = 0;
-	count_list *counts = start;
-	while(counts != NULL && current < max) {
-		counts = counts->next;
-		current++;
+	list->size *= 2;
+	SparseCounts **new_counts = malloc(sizeof(SparseCounts *) * list->size);
+	for(int i=0;i<list->used;i++) {
+		new_counts[i] = list->counts[i];
 	}
-	if(counts != NULL) {
-		return counts->counts;
-	} else {
-		return NULL;
+	SparseCounts **old_counts = list->counts;
+	list->counts = new_counts;
+	free(old_counts);
+}
+
+SparseCounts *count_list_get(count_list *list, unsigned int index)
+{
+	return list->counts[index];
+}
+
+void count_list_add(count_list *list)
+{
+	if(list->used >= list->size) {
+		count_list_resize(list);
 	}
+	list->counts[list->used++] = SparseCounts_new(SPARSECOUNTS_BUCKETS);
+}
+
+void count_list_set(count_list *list,SparseCounts *counts, unsigned int index)
+{
+	list->counts[index] = counts;
 }

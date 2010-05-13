@@ -22,7 +22,7 @@ void each_doc(char *doc)
 
 void test_corpus()
 {
-	corpus *corp = corpus_new("data","txt",10);
+	corpus *corp = corpus_new("test/data","txt",10);
 	corpus_count = 0;
 	corpus_each_document(corp, &each_doc);
 	assert(corpus_count == 10);

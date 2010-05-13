@@ -82,9 +82,7 @@ void nLDA_gibbs_init_each_document(unsigned int *words,unsigned int size)
 	if(static_nlda->ncd == NULL) {
 		static_nlda->ncd = count_list_new();
 	} else {
-		count_list *end = static_nlda->ncd;
-		while(end->next != NULL) { end = end->next; }
-		end->next = count_list_new();
+		count_list_add(static_nlda->ncd);
 	}
 	
 //	char tpl[30];
@@ -199,9 +197,7 @@ unsigned int nLDA_new_category(nLDA *nlda)
 	if(nlda->nwc == NULL) {
 		nlda->nwc = count_list_new();
 	} else {
-		count_list *list = nlda->nwc;
-		while(list->next != NULL) { list = list->next; }
-		list->next = count_list_new();
+		count_list_add(nlda->nwc);
 	}
 //	printf("Creating category %d\n",nlda->categories);
 	return nlda->categories++;
