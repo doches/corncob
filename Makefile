@@ -92,7 +92,9 @@ nlda: context_corpus.o progressbar.o nlda.o WordMap.o SparseCounts.o ct_hash.o w
 clean:
 	rm -f *.o
 	rm -rf doc/
-	rm $(EXECUTABLES)
+	rm -f $(EXECUTABLES)
+	rm -f **/*~
+	rm -f *~
 
 # Doc target
 doc: lib/*.h tools/*.h
