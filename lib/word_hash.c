@@ -125,12 +125,8 @@ word_hash_element *word_hash_get(word_hash *map, const char *key)
 			element = element->next;
 		}
 	}
-	word_hash_element zero;
-	zero.key = NULL;
-	zero.value = 0;
-	zero.next = NULL;
 	if (!element) {
-		element = &zero;
+		return NULL;
 	} else if(prev != NULL) {
 		// If we actually found something, move it to the head of its bucket
 		prev->next = element->next;

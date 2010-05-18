@@ -26,7 +26,7 @@ void test_hash()
 	
 	// Test get with invalid key
 	e = hash_get(map, -1);
-	assert(e->key==-1);
+	assert(e == NULL);
 	
 	// Test get-and-modify
 	e = hash_get(map, 0);

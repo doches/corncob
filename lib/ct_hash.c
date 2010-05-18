@@ -107,13 +107,6 @@ hash_element *hash_get(ct_hash *map, int key)
 			element = element->next;
 		}
 	}
-	hash_element zero;
-	zero.key = -1	;
-	zero.value = 0;
-	zero.next = NULL;
-	if (!element) {
-		element = &zero;
-	}
 	return element;
 }
 

@@ -69,6 +69,11 @@ void nLDA_gibbs(nLDA *nlda, context_corpus *corpus,unsigned int iterations)
 	char filename[40];
 	for(int i=0;i<iterations;i++) {
 		nLDA_gibbs_iteration(nlda,i);
+		
+		if(nlda->categories > nlda->word_count/3) {
+			nLDA_reset_categories(nlda);
+		}
+		
 		sprintf(filename,"%stest.%d.probabilities",nlda->prefix,i);
 		nLDA_dump(nlda,filename);
 	}
@@ -268,11 +273,38 @@ double nLDA_P_w_c_new(nLDA *nlda, unsigned int word)
 
 void nLDA_reset_categories(nLDA *nlda)
 {
-	unsigned int 
+	ct_hash *word_map = hash_new(nlda->word_count);
 	Instance *i = nlda->instances;
+	double best_prob = 0.0f;
+	int best_cat = -1;
+	double temp_prob;
+	
+	ct_hash *new_category_map = hash_new(nlda->categories);
+	unsigned int new_categories = 0;
+	
 	while(i != NULL) {
+		hash_element *elem = hash_get(word_map,i->w_i);
+
+		if(elem == NULL) {
+			for(int k=0;k<nlda->categories;k++) {
+				temp_prob = nLDA_P_w_c(nlda,i->w_i,k);
+				if(temp_prob > best_prob) {
+					best_prob = temp_prob;
+					best_cat = k;
+				}
+			}
+			elem = hash_add(word_map,i->w_i,best_cat);
+			hash_element *new_cat = hash_get(new_category_map,best_cat);
+			if(new_cat == NULL) {
+				new_cat = hash_add(new_category_map,best_cat,new_categories++);
+			}
+			elem->value = new_cat->value;
+		}
+		i->z_i = elem->value;
+		
 		i = i->next;
 	}
+	nlda->categories = new_categories;
 }
 
 void nLDA_dump(nLDA *nlda, char *file)

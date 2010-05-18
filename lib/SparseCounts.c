@@ -24,11 +24,7 @@ hash_element *SparseCounts_add(SparseCounts *counts, int key, int value)
 hash_element *SparseCounts_getElement(SparseCounts *counts, int key)
 {
   hash_element *element = hash_get(counts->map, key);
-  if (element->key == key) {
-    return element;
-  } else {
-    return NULL;
-  }
+  return element;
 }
 
 // Returns -1 if key is not found!

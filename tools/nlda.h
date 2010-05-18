@@ -38,6 +38,7 @@ SparseCounts *nLDA_get_nwc(nLDA *nlda, unsigned int category);
 SparseCounts *nLDA_get_ncd(nLDA *nlda, unsigned int document);
 void nLDA_gibbs_init(nLDA *nlda);
 void nLDA_gibbs_iteration(nLDA *nlda, unsigned int iteration);
+void nLDA_reset_categories(nLDA *nlda);
 
 unsigned int nLDA_sample_category(nLDA *nlda, unsigned int word);
 unsigned int nLDA_new_category(nLDA *nlda);

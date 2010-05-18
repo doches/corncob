@@ -35,7 +35,7 @@ void test_word_hash()
 	
 	// Test get with invalid key
 	word_hash_element *e = word_hash_get(map, "eggs");
-	assert(e->key==NULL);
+	assert(e==NULL);
 	
 	// Test get with valid key
 	e = word_hash_get(map, "foo");
