@@ -53,41 +53,34 @@ hash_element *hash_add(ct_hash *map,int key,unsigned int value)
 	if (map->buckets[index] == NULL) {
 		map->buckets[index] = ct_h_element_new(key, value);
 		map->size++;
-#ifdef DEBUG
-		printf("Adding [%d:%d] to new chain %d\n",key,value,index);
-#endif
 	} else {
-#ifdef DEBUG
-		int length = 0;
-#endif
 		hash_element *chain = map->buckets[index];
 		while (chain->next != NULL) {
 			if (chain->key == key) {
 				chain->value = value;
-#ifdef DEBUG
-				printf("Overwriting existing key %d in chain %d\n",key,index);
-#endif
 				return chain;
 			}
 			chain = chain->next;
-#ifdef DEBUG
-			length++;
-#endif
 		}
 		if (chain->key == key) {
 			chain->value = value;
-#ifdef DEBUG
-			printf("Overwriting existing key %d in chain %d\n",key,index);
-#endif
 			return chain;
 		}
 		chain->next = ct_h_element_new(key, value);
 		map->size++;
-#ifdef DEBUG
-		printf("Adding [%d:%d] to chain %d (length %d)\n",key,value,index,length);
-#endif
 	}
 	return map->buckets[index];
+}
+
+// Update an element in the has by adding <change>; if the element doesn't exist, it takes on the value <change>
+void hash_update(ct_hash *map, int key, int change)
+{
+	hash_element *elem = hash_get(map,key);
+	if(elem->key != key) {
+		hash_add(map,key,change);
+	} else {
+		elem->value += change;
+	}
 }
 
 // Iterate over the key-value pairs in this map
