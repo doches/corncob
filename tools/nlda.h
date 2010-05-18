@@ -30,7 +30,7 @@ typedef struct t_nLDA
 	char *prefix;
 } nLDA;
 
-nLDA *nLDA_new(double alpha, double beta,char *prefix);
+nLDA *nLDA_new(double alpha, double beta,double gamma,char *prefix);
 void nLDA_gibbs(nLDA *nlda, context_corpus *corpus, unsigned int iterations);
 void nLDA_dump(nLDA *nlda, char *file);
 void nLDA_free(nLDA *nlda);

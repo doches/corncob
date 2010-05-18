@@ -9,17 +9,18 @@
 
 int main(int argc, char *argv[])
 {
-	if(argc != 6) {
-		printf("Usage: nlda <alpha> <beta> <corpus_filename> <output_prefix> <iterations>\n");
-		printf("\t(Expected 5 arguments, got %d!)\n",argc);
+	if(argc != 7) {
+		printf("Usage: nlda <alpha> <beta> <gamma> <corpus_filename> <output_prefix> <iterations>\n");
+		printf("\t(Expected 6 arguments, got %d!)\n",argc-1);
 		return 1;
 	}
 	double alpha = atof(argv[1]);
 	double beta = atof(argv[2]);
-	context_corpus *corpus = context_corpus_new(argv[3]);
+	double gamma = atof(argv[3]);
+	context_corpus *corpus = context_corpus_new(argv[4]);
 	
-	nLDA *nlda = nLDA_new(alpha,beta,argv[4]);
-	nLDA_gibbs(nlda, corpus,atoi(argv[5]));
+	nLDA *nlda = nLDA_new(alpha,beta,gamma,argv[5]);
+	nLDA_gibbs(nlda, corpus,atoi(argv[6]));
 	nLDA_free(nlda);
 	
 	return 0;
@@ -27,7 +28,7 @@ int main(int argc, char *argv[])
 
 /**** Implementation ****/
 
-nLDA *nLDA_new(double alpha, double beta, char *prefix)
+nLDA *nLDA_new(double alpha, double beta, double gamma, char *prefix)
 {
 	srand(time(0));
 
@@ -40,7 +41,7 @@ nLDA *nLDA_new(double alpha, double beta, char *prefix)
 	new->categories = 0;
 	new->alpha = alpha;
 	new->beta = beta;
-	new->gamma = 0.1f;
+	new->gamma = gamma;
 	new->empty_category = -1;
 	new->corpus = NULL;
 	new->wordmap = WordMap_new(NLDA_WORDMAP_BUCKETS);
@@ -84,7 +85,7 @@ void nLDA_gibbs_init_each_document(unsigned int *words,unsigned int size)
 	} else {
 		count_list_add(static_nlda->ncd);
 	}
-	
+//	printf("%d\n",static_nlda->categories);
 //	char tpl[30];
 //	sprintf(tpl,"Document %d",zzz++);
 //	progressbar *tp = progressbar_new(tpl,size);
@@ -122,9 +123,7 @@ void nLDA_gibbs_init_each_document(unsigned int *words,unsigned int size)
 void nLDA_gibbs_init(nLDA *nlda)
 {
 	static_nlda = nlda;
-	fprintf(stderr,"Loading...");
 	context_corpus_make_documents(nlda->corpus);
-	fprintf(stderr,"%d\n",(int)nlda->corpus->document_count);
 	progress = progressbar_new("Gibbs init",nlda->corpus->document_count);
 	context_corpus_each_document(nlda->corpus,&nLDA_gibbs_init_each_document);
 	progressbar_finish(progress);
