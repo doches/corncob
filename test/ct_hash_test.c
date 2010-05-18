@@ -13,8 +13,11 @@ void test_hash()
 	ct_hash *map = hash_new(10);
 	assert(map->size == 0);
 	
+	hash_element *a;
 	for (int i=0; i<20; i++) {
-		hash_add(map, i, 100+i);
+		a = hash_add(map, i, 100+i);
+		assert(a->key == i);
+		assert(a->value == 100+i);
 	}
 	
 	// Test size
@@ -42,10 +45,23 @@ void test_hash()
 	e = hash_get(map, 0);
 	assert(e->value == 12);
 	
+	// Test update
+	  // ..with existing key
+	e = hash_update(map,10,-1);
+	assert(e->value == 109);
+	assert(e->key == 10);
+	  // ..with new key
+	e = hash_get(map,312);
+	assert(e == NULL);
+	e = hash_update(map,312,9);
+	assert(e->key == 312);
+	assert(e->value == 9);
+	
+	
 	// Test iteration
 	count = 0;
 	hash_foreach(map, &print_pair);
-	assert(count == 20);
+	assert(count == 21);
 	
 	hash_free(map);
 }

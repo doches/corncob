@@ -40,7 +40,7 @@ hash_element *hash_get(ct_hash *map, int key);
 hash_element *hash_add(ct_hash *map,int key,unsigned int value);
 void hash_foreach(ct_hash *map,void (*callback)(hash_element *));
 void hash_free(ct_hash *map);
-void hash_update(ct_hash *map, int key, int change);
+hash_element *hash_update(ct_hash *map, int key, int change);
 
 #endif
 

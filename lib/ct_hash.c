@@ -8,6 +8,7 @@
  */
 
 #include "ct_hash.h"
+#include <assert.h>
 
 /*********** Hash Element **************/
 
@@ -49,12 +50,14 @@ int ct_h_hash(unsigned int key,int interval)
 hash_element *hash_add(ct_hash *map,int key,unsigned int value)
 {
 	unsigned int index = ct_h_hash(key,map->num_buckets);
+	hash_element *chain;
 	
 	if (map->buckets[index] == NULL) {
 		map->buckets[index] = ct_h_element_new(key, value);
 		map->size++;
+		return map->buckets[index];
 	} else {
-		hash_element *chain = map->buckets[index];
+		chain = map->buckets[index];
 		while (chain->next != NULL) {
 			if (chain->key == key) {
 				chain->value = value;
@@ -68,19 +71,20 @@ hash_element *hash_add(ct_hash *map,int key,unsigned int value)
 		}
 		chain->next = ct_h_element_new(key, value);
 		map->size++;
+		return chain->next;
 	}
-	return map->buckets[index];
 }
 
 // Update an element in the has by adding <change>; if the element doesn't exist, it takes on the value <change>
-void hash_update(ct_hash *map, int key, int change)
+hash_element *hash_update(ct_hash *map, int key, int change)
 {
 	hash_element *elem = hash_get(map,key);
-	if(elem->key != key) {
-		hash_add(map,key,change);
+	if(elem == NULL){
+		elem = hash_add(map,key,change);
 	} else {
 		elem->value += change;
 	}
+	return elem;
 }
 
 // Iterate over the key-value pairs in this map
