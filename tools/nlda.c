@@ -221,14 +221,6 @@ unsigned int nLDA_sample_category(nLDA *nlda, unsigned int word)
 	
 	double sample = (rand()/(double)RAND_MAX) * total;
 	
-	/*
-	printf("%f:[%f",sample,probs[0]);
-	for(int k=1;k<nlda->categories+1;k++) {
-		printf(" %f",probs[k]);
-	}
-	printf("] (%f)\n",total);
-	*/
-
 	for(int k=0;k<nlda->categories;k++) {
 		sample -= probs[k];
 		if(sample <= 0.0f) {
@@ -272,6 +264,15 @@ double nLDA_P_w_c_new(nLDA *nlda, unsigned int word)
 	double numerator = (nlda->alpha);
 	double denominator = (nlda->word_count * nlda->alpha);
 	return numerator / denominator;
+}
+
+void nLDA_reset_categories(nLDA *nlda)
+{
+	unsigned int 
+	Instance *i = nlda->instances;
+	while(i != NULL) {
+		i = i->next;
+	}
 }
 
 void nLDA_dump(nLDA *nlda, char *file)

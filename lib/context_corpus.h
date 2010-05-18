@@ -7,6 +7,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "ct_hash.h"
 #include "SparseCounts.h"
 #include "progressbar.h"
 

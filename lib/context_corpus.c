@@ -111,6 +111,24 @@ void context_corpus_make_documents(context_corpus *corpus)
 	context_corpus_make_each_document(corpus);
 }
 
+unsigned int *gcf;
+void cc_lcd_fe(hash_element *elem)
+{
+	printf("[%d: %d]\n",elem->key, elem->value);
+}
+
+unsigned int context_corpus_lcd_document(unsigned int *document, unsigned int size)
+{
+	ct_hash *unique = hash_new(128);
+	for(int i=0;i<size;i++) {
+		hash_update(unique,document[i],1);
+	}
+	gcf = malloc(sizeof(unsigned int)*10);
+//	hash_foreach(unique,&cc_lcd_fe);
+//	printf("------------\n");
+	return size;
+}
+
 void context_corpus_make_each_document(context_corpus *corpus)
 {
 	context_corpus_edoc *last = corpus->documents;
@@ -118,15 +136,16 @@ void context_corpus_make_each_document(context_corpus *corpus)
 	for(int doc=0;doc<=corpus->dims;doc++) {
 		context_corpus_d *list = corpus->list;
 		unsigned int docsize = 32;
-		unsigned int *document = malloc(sizeof(unsigned int *)*docsize);
+		unsigned int *document = malloc(sizeof(unsigned int)*docsize);
 		unsigned int docindex = 0;
 		unsigned int w_i = 0;
+		
 		while(list != NULL) {
 			for(int i=0;i<SparseCounts_getValue(list->counts,doc);i++) {
 				document[docindex] = w_i;
 				docindex++;
 				if(docindex >= docsize) {
-					unsigned int *newdoc = malloc(sizeof(unsigned int *)*(docsize*2));
+					unsigned int *newdoc = malloc(sizeof(unsigned int)*(docsize*2));
 					//memcpy(newdoc,document,docsize);
 					for(int k=0;k<docindex;k++) {
 						newdoc[k] = document[k];
@@ -142,12 +161,11 @@ void context_corpus_make_each_document(context_corpus *corpus)
 		
 		// Sanity check
 		for(int q=0;q<docindex;q++) {
-			if(document[q] > w_i) {
-				assert(document[q] <= w_i);
-			}
+			assert(document[q] <= w_i);
 		}
 		
-		if(docindex > 0) {
+		if(docindex > 1) {
+//			docindex = context_corpus_lcd_document(document,docindex);
 			context_corpus_edoc *edoc = context_corpus_edoc_new(document,docindex);
 			if(corpus->documents == NULL) {
 				corpus->documents = edoc;
