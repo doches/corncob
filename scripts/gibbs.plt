@@ -1,3 +1,5 @@
+set terminal png
+set output "gibbs.png"
 f(x) = m*x + b
 fit f(x) 'gibbs.dat' via m,b
 baseline(x) = 0.141825

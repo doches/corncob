@@ -49,3 +49,4 @@ void count_list_set(count_list *list,SparseCounts *counts, unsigned int index)
 {
 	list->counts[index] = counts;
 }
+

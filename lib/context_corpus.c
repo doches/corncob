@@ -112,18 +112,21 @@ void context_corpus_make_documents(context_corpus *corpus)
 }
 
 unsigned int *gcf;
-void cc_lcd_fe(hash_element *elem)
+void cc_gcd_fe(hash_element *elem)
 {
 	printf("[%d: %d]\n",elem->key, elem->value);
 }
 
-unsigned int context_corpus_lcd_document(unsigned int *document, unsigned int size)
+unsigned int context_corpus_gcd_document(unsigned int *document, unsigned int size)
 {
 	ct_hash *unique = hash_new(128);
 	for(int i=0;i<size;i++) {
 		hash_update(unique,document[i],1);
 	}
 	gcf = malloc(sizeof(unsigned int)*10);
+	memset(gcf,(char)0,sizeof(unsigned int)*10);
+	printf("%d\n",gcf[2]);
+	exit(1);
 //	hash_foreach(unique,&cc_lcd_fe);
 //	printf("------------\n");
 	return size;
@@ -165,7 +168,7 @@ void context_corpus_make_each_document(context_corpus *corpus)
 		}
 		
 		if(docindex > 1) {
-//			docindex = context_corpus_lcd_document(document,docindex);
+			docindex = context_corpus_gcd_document(document,docindex);
 			context_corpus_edoc *edoc = context_corpus_edoc_new(document,docindex);
 			if(corpus->documents == NULL) {
 				corpus->documents = edoc;
@@ -174,6 +177,10 @@ void context_corpus_make_each_document(context_corpus *corpus)
 				last->next = edoc;
 				last = edoc;
 			}
+//			for(int q=0;q<(docindex < 20 ? docindex : 20);q++) {
+//				printf("%d ",document[q]);
+//			}
+//			printf("\n");
 			corpus->document_count++;
 		}
 		progressbar_inc(progress);

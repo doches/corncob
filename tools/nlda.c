@@ -70,7 +70,7 @@ void nLDA_gibbs(nLDA *nlda, context_corpus *corpus,unsigned int iterations)
 	for(int i=0;i<iterations;i++) {
 		nLDA_gibbs_iteration(nlda,i);
 		
-		if(nlda->categories > nlda->word_count/3) {
+		if(nlda->categories > nlda->word_count) {
 			nLDA_reset_categories(nlda);
 		}
 		
