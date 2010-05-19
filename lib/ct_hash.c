@@ -75,7 +75,7 @@ hash_element *hash_add(ct_hash *map,int key,unsigned int value)
 	}
 }
 
-// Update an element in the has by adding <change>; if the element doesn't exist, it takes on the value <change>
+// Update an element in the hash by adding <change>; if the element doesn't exist, it takes on the value <change>
 hash_element *hash_update(ct_hash *map, int key, int change)
 {
 	hash_element *elem = hash_get(map,key);

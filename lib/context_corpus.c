@@ -111,24 +111,26 @@ void context_corpus_make_documents(context_corpus *corpus)
 	context_corpus_make_each_document(corpus);
 }
 
-unsigned int *gcf;
-void cc_gcd_fe(hash_element *elem)
+unsigned int context_corpus_randomize_document(unsigned int *document, unsigned int size)
 {
-	printf("[%d: %d]\n",elem->key, elem->value);
-}
-
-unsigned int context_corpus_gcd_document(unsigned int *document, unsigned int size)
-{
-	ct_hash *unique = hash_new(128);
-	for(int i=0;i<size;i++) {
-		hash_update(unique,document[i],1);
+	short unique = 1;
+	for(int i=1;i<size;i++) {
+		if(document[i-1] != document[i]) {
+			unique = 0;
+			break;
+		}
 	}
-	gcf = malloc(sizeof(unsigned int)*10);
-	memset(gcf,(char)0,sizeof(unsigned int)*10);
-	printf("%d\n",gcf[2]);
-	exit(1);
-//	hash_foreach(unique,&cc_lcd_fe);
-//	printf("------------\n");
+	if(unique) {
+		size = 1;
+	} else {
+		for(int i=0;i<size;i++) {
+			unsigned int other = rand()%size;
+			unsigned int temp = document[i];
+			document[i] = document[other];
+			document[other] = temp;
+		}
+		size = (size > 100 ? 100 : size);
+	}
 	return size;
 }
 
@@ -136,6 +138,7 @@ void context_corpus_make_each_document(context_corpus *corpus)
 {
 	context_corpus_edoc *last = corpus->documents;
 	progressbar *progress = progressbar_new("Loading",corpus->dims);
+	unsigned long instance_count = 0;
 	for(int doc=0;doc<=corpus->dims;doc++) {
 		context_corpus_d *list = corpus->list;
 		unsigned int docsize = 32;
@@ -149,7 +152,6 @@ void context_corpus_make_each_document(context_corpus *corpus)
 				docindex++;
 				if(docindex >= docsize) {
 					unsigned int *newdoc = malloc(sizeof(unsigned int)*(docsize*2));
-					//memcpy(newdoc,document,docsize);
 					for(int k=0;k<docindex;k++) {
 						newdoc[k] = document[k];
 					}
@@ -168,7 +170,8 @@ void context_corpus_make_each_document(context_corpus *corpus)
 		}
 		
 		if(docindex > 1) {
-			docindex = context_corpus_gcd_document(document,docindex);
+			docindex = context_corpus_randomize_document(document,docindex);
+			instance_count += docindex;
 			context_corpus_edoc *edoc = context_corpus_edoc_new(document,docindex);
 			if(corpus->documents == NULL) {
 				corpus->documents = edoc;
@@ -177,15 +180,19 @@ void context_corpus_make_each_document(context_corpus *corpus)
 				last->next = edoc;
 				last = edoc;
 			}
-//			for(int q=0;q<(docindex < 20 ? docindex : 20);q++) {
-//				printf("%d ",document[q]);
-//			}
-//			printf("\n");
+			/*
+			printf("[%d]: ",docindex);
+			for(int q=0;q<(docindex < 20 ? docindex : 20);q++) {
+				printf("%d ",document[q]);
+			}
+			printf("\n");
+			*/
 			corpus->document_count++;
 		}
 		progressbar_inc(progress);
 	}
 	progressbar_finish(progress);
+	fprintf(stderr,"Loaded %l instances in %d training documents\n",instance_count,corpus->document_count);
 }
 
 void context_corpus_each_document(context_corpus *corpus, void (*document_callback)(unsigned int *words, unsigned int size))
