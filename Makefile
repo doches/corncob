@@ -1,13 +1,13 @@
 # Makefile for lda-c and assorted tools (int->int hash, string->int hash, sparsecount, etc.)
 
 CC = gcc
-CFLAGS = -g -std=c99 -Wall -I lib/ -I vendor/include/ -I tools/ -O2
+CFLAGS = -g -std=c99 -Wall -I lib/ -I vendor/include/ -I tools/
 EXECUTABLES = lda rmc wordcount ctools_test nlda
 HEADERS = lib/corpus.h lib/ct_hash.h lib/SparseCounts.h lib/word_hash.h lib/WordMap.h tools/lda.h tools/rmc.h lib/count_list.h lib/context_corpus.h vendor/include/progressbar.h tools/nlda.h
 
 # Test target (default)
-test: ct_hash_test.o word_hash_test.o corpus_test.o SparseCounts_test.o WordMap_test.o test.o context_corpus_test.o
-	$(CC) $(CFLAGS) test.o word_hash_test.o ct_hash_test.o corpus_test.o SparseCounts_test.o WordMap_test.o WordMap.o word_hash.o ct_hash.o corpus.o SparseCounts.o context_corpus.o context_corpus_test.o progressbar.o -o ctools_test
+test: ct_hash_test.o word_hash_test.o corpus_test.o SparseCounts_test.o WordMap_test.o test.o context_corpus_test.o line_corpus_test.o
+	$(CC) $(CFLAGS) test.o word_hash_test.o ct_hash_test.o corpus_test.o SparseCounts_test.o WordMap_test.o WordMap.o word_hash.o ct_hash.o corpus.o SparseCounts.o context_corpus.o context_corpus_test.o progressbar.o line_corpus_test.o line_corpus.o -o ctools_test
 	./ctools_test
 	
 ctools_test: test
@@ -32,6 +32,9 @@ SparseCounts_test.o: SparseCounts.o test/SparseCounts_test.c test/SparseCounts_t
 	
 WordMap_test.o: WordMap.o test/WordMap_test.c test/WordMap_test.h
 	$(CC) -c $(CFLAGS) test/WordMap_test.c
+
+line_corpus_test.o: line_corpus.o test/line_corpus_test.h test/line_corpus_test.c
+	$(CC) -c $(CFLAGS) test/line_corpus_test.c
 
 # LDA target
 lda: ct_hash.o word_hash.o corpus.o lda.o Instance.o
@@ -87,6 +90,16 @@ nlda.o: tools/nlda.h tools/nlda.c
 
 nlda: context_corpus.o progressbar.o nlda.o WordMap.o SparseCounts.o ct_hash.o word_hash.o Instance.o count_list.o
 	$(CC) $(CFLAGS) WordMap.o SparseCounts.o word_hash.o ct_hash.o Instance.o count_list.o context_corpus.o progressbar.o nlda.o -o nlda
+
+# nLDA2 target
+line_corpus.o: lib/line_corpus.h lib/line_corpus.c
+	$(CC) -c $(CFLAGS) lib/line_corpus.c
+
+nlda2.o: tools/nlda2.h tools/nlda2.c
+	$(CC) -c $(CFLAGS) tools/nlda2.c
+
+nlda2: line_corpus.o progressbar.o WordMap.o SparseCounts.o ct_hash.o word_hash.o Instance.o nlda2.o count_list.o
+	$(CC) $(CFLAGS) line_corpus.o progressbar.o WordMap.o SparseCounts.o ct_hash.o word_hash.o Instance.o nlda2.o count_list.o -o nlda2
 
 # Clean target
 clean:

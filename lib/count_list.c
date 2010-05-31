@@ -6,7 +6,6 @@ count_list *count_list_new()
 	new->size = COUNT_LIST_DEFAULT_SIZE;
 	new->counts = malloc(sizeof(SparseCounts *) * new->size);
 	new->used = 0;
-	count_list_add(new);
 	return new;
 }
 
