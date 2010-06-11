@@ -1,15 +1,20 @@
 #include "nlda2.h"
 
+unsigned int reassess_window = 0;
 int main(int argc, char **argv)
 {
-	if(argc != 6) {
-		printf("nlda2 expects 5 arguments, received %d\n",argc-1);
-		printf("\nUsage: nlda2 [alpha] [beta] [gamma] [corpusfile] [outfile]\n");
+	if(argc < 6) {
+		printf("nlda2 expects 5-6 arguments, received %d\n",argc-1);
+		printf("\nUsage: nlda2 [alpha] [beta] [gamma] [corpusfile] [outfile] <reassess_window>\n");
 		return 1;
 	}
 	double alpha = atof(argv[1]);
 	double beta = atof(argv[2]);
 	double gamma = atof(argv[3]);
+	reassess_window = 10;
+	if(argc == 7) {
+		reassess_window = atoi(argv[6]);
+	}
 	nLDA *model = nLDA_new(alpha,beta,gamma,argv[4]);
 	nLDA_train(model);
 	nLDA_dump(model,argv[5]);
@@ -111,7 +116,7 @@ void nLDA_reassess(nLDA *model)
 		reassess_count++;
 	}
 
-	if(reassess_count >= 100 && reassess_start == NULL) {
+	if(reassess_count >= reassess_window && reassess_start == NULL) {
 		reassess_start = model->instances;
 	}
 }
