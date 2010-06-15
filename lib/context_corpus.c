@@ -129,7 +129,8 @@ unsigned int context_corpus_randomize_document(unsigned int *document, unsigned 
 			document[i] = document[other];
 			document[other] = temp;
 		}
-		size = (size > 100 ? 100 : size);
+//		size = (size > 100 ? 100 : size);
+		size /= 2;
 	}
 	return size;
 }
@@ -138,7 +139,7 @@ void context_corpus_make_each_document(context_corpus *corpus)
 {
 	context_corpus_edoc *last = corpus->documents;
 	progressbar *progress = progressbar_new("Loading",corpus->dims);
-	unsigned long instance_count = 0;
+	unsigned int instance_count = 0;
 	for(int doc=0;doc<=corpus->dims;doc++) {
 		context_corpus_d *list = corpus->list;
 		unsigned int docsize = 32;
@@ -191,8 +192,8 @@ void context_corpus_make_each_document(context_corpus *corpus)
 		}
 		progressbar_inc(progress);
 	}
-	progressbar_finish(progress);
-	fprintf(stderr,"Loaded %l instances in %d training documents\n",instance_count,corpus->document_count);
+//	progressbar_finish(progress);
+	fprintf(stderr,"Loaded %u instances in %u training documents\n",instance_count,(unsigned int)(corpus->document_count));
 }
 
 void context_corpus_each_document(context_corpus *corpus, void (*document_callback)(unsigned int *words, unsigned int size))

@@ -7,8 +7,8 @@ end
 dir = ARGV[0]
 
 rocco = "/home/s0897549/models/rocco/bin/rocco_label"
-target = "/home/s0897549/models/rocco/data/target_words"
-mcrae = "/home/s0897549/models/rocco/eval/mcrae.cluster"
+target = ARGV[1].nil? ? "/home/s0897549/models/rocco/data/target_words" : ARGV[1]
+mcrae = ARGV[2].nil? ? "/home/s0897549/models/rocco/eval/mcrae.cluster" : ARGV[2]
 
 clusters = []
 

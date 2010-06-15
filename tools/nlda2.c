@@ -78,7 +78,10 @@ void nLDA_dump(nLDA *model, char *filename)
 		fprintf(fout,"%d %d\n",w,best);
 	}
 	fclose(fout);
-	WordMap_dump(model->corpus->wordmap,"nlda2_wordmap");
+	char wfname[80] = "";
+	strcpy((char *)wfname,filename);
+	strcat((char *)wfname,".wordmap");
+	WordMap_dump(model->corpus->wordmap,wfname);
 	Instance_free(instance);
 }
 
@@ -138,7 +141,7 @@ void nLDA_assign_category(nLDA *model, Instance *instance)
 	}
 	probabilities[model->categories] = nLDA_P_w_c_new(model,instance) * nLDA_P_c_new(model);
 	total += probabilities[model->categories];
-	double sample = ((arc4random()%1000)/(1000.0)) * total;
+	double sample = ((random()%1000)/(1000.0)) * total;
 	
 	for(unsigned int i=0;i<model->categories;i++) {
 		sample -= probabilities[i];

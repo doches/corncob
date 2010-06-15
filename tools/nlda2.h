@@ -30,3 +30,4 @@ void nLDA_dump(nLDA *model, char *filename);
 void nLDA_reassess(nLDA *model);
 
 #endif
+
