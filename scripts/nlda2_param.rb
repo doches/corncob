@@ -1,7 +1,5 @@
 # Do genetic algorithms exploration of parameter space for nlda2
 
-OutputDir = "parameter_exploration"
-
 class Instance
 	MaxWindow = 10
 	attr_accessor :alpha, :beta, :gamma, :window
@@ -28,6 +26,8 @@ class Instance
 		@beta += (rand*@beta*rate) * (rand < 0.5 ? -1 : 1)
 		@gamma += (rand*@gamma*rate) * (rand < 0.5 ? -1 : 1)
 		@window += (rand*@window*rate).to_i * (rand < 0.5 ? -1 : 1)
+		
+		@window = 0 if @window < 0.0
 	end
 	
 	def breed_with(b)
@@ -35,7 +35,7 @@ class Instance
 	end
 	
 	def score
-		outfile = "#{OutputDir}/#{@alpha}_#{@beta}_#{@gamma}_#{@window}"
+		outfile = "#{@@input}.results/#{@alpha}_#{@beta}_#{@gamma}_#{@window}"
 		`./nlda2 #{@alpha} #{@beta} #{@gamma} #{@@input} #{outfile} #{@window}`
 		return `ruby scripts/nlda2_eval.rb #{outfile}`.to_f
 	end
@@ -72,7 +72,21 @@ class World
 		@best = [nil,0]
 		
 		Instance.input = input
-		`rm #{OutputDir}/*`
+		begin
+			report = `head -n 5 #{Instance.input}.results/report`.split("\n").reject { |l| not l =~ /<([^>]+)>/ }.pop
+			report =~ /<([^>]+)>/
+			params = $1.split(" ").map { |x| x.to_f }
+			@population.clear
+			@population = (1..popsize).map { |i| Instance.new(*params) }
+			@population.each_with_index { |i,dex| i.mutate!(1.0) if dex > 1 }
+			STDERR.puts "Resuming from previous trial..."
+		rescue
+			STDERR.puts $!
+		ensure
+			`rm #{Instance.input}.results/*`
+		end
+		
+		`mkdir #{Instance.input}.results/` if not File.exists?("#{Instance.input}.results/")
 	end
 	
 	def simulate_generation
@@ -96,7 +110,7 @@ class World
 		# Report
 		STDERR.puts "#{scores[0][0].to_s} / #{scores[0][1]}"
 		STDERR.puts ""
-		fout = File.open("#{OutputDir}/report","a+")
+		fout = File.open("#{Instance.input}.results/report","a+")
 		fout.puts "##### Generation #{@generation} #####"
 		fout.puts "Elapsed: #{elapsed}"
 		fout.puts "Params:  #{@best[0].to_s}"
