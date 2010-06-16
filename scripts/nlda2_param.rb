@@ -1,8 +1,9 @@
 # Do genetic algorithms exploration of parameter space for nlda2
 
 class Instance
-	MaxWindow = 10
+	MaxWindow = 30
 	attr_accessor :alpha, :beta, :gamma, :window
+	attr_reader :elapsed
 	
 	@@input=nil
 	
@@ -22,12 +23,20 @@ class Instance
 	end
 	
 	def mutate!(rate)
-		@alpha += (rand*@alpha*rate) * (rand < 0.5 ? -1 : 1)
-		@beta += (rand*@beta*rate) * (rand < 0.5 ? -1 : 1)
-		@gamma += (rand*@gamma*rate) * (rand < 0.5 ? -1 : 1)
-		@window += (rand*@window*rate).to_i * (rand < 0.5 ? -1 : 1)
-		
-		@window = 0 if @window < 0.0
+		gene = rand
+		if gene < 0.25
+			@alpha += (rand) * (rand < 0.5 ? -1 : 1)
+			@alpha = 0.001 if @alpha < 0.0
+		elsif gene < 0.5
+			@beta += (rand) * (rand < 0.5 ? -1 : 1)
+			@beta = 0.001 if @beta < 0.0
+		elsif gene < 0.75
+			@gamma += (rand) * (rand < 0.5 ? -1 : 1)
+			@gamma = 0.001 if @gamma < 0.0
+		else
+			@window += (1+rand*5).to_i * (rand < 0.5 ? -1 : 1)
+			@window = 0 if @window < 0.0
+		end
 	end
 	
 	def breed_with(b)
@@ -36,8 +45,10 @@ class Instance
 	
 	def score
 		outfile = "#{@@input}.results/#{@alpha}_#{@beta}_#{@gamma}_#{@window}"
+		start = Time.now
 		`./nlda2 #{@alpha} #{@beta} #{@gamma} #{@@input} #{outfile} #{@window}`
-		return `ruby scripts/nlda2_eval.rb #{outfile}`.to_f
+		@elapsed = Time.now - start
+		return `ruby scripts/nlda2_eval.rb #{outfile}`.to_f 
 	end
 	
 	def to_s
@@ -96,7 +107,7 @@ class World
 		STDERR.puts ""
 		STDERR.puts "#### Generation #{@generation} ####"
 		STDERR.puts "Elapsed: #{elapsed}"
-		scores.each { |i| STDERR.puts "#{i[0].to_s} / #{i[1]}" }
+		scores.each { |i| STDERR.puts "#{i[0].to_s} \t#{i[1]}\t(#{i[0].elapsed}s)" }
 		STDERR.puts "-------------------------------"
 		if scores[0][1] > @best[1]
 			@best = scores[0].dup
