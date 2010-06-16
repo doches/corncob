@@ -26,10 +26,10 @@ class Instance
 		gene = rand
 		if gene < 0.25
 			@alpha += (rand) * (rand < 0.5 ? -1 : 1)
-			@alpha += rand if @alpha < 0.0
+			@alpha = 0.001 if @alpha < 0.0
 		elsif gene < 0.5
 			@beta += (rand) * (rand < 0.5 ? -1 : 1)
-			@beta = rand*0.8+0.2 if (@beta < 0.2 or @beta > 1.0)
+			@beta = 0.001 if @beta < 0.0
 		elsif gene < 0.75
 			@gamma += (rand) * (rand < 0.5 ? -1 : 1)
 			@gamma = 0.001 if @gamma < 0.0
@@ -102,7 +102,7 @@ class World
 	
 	def simulate_generation
 		start_time = Time.now
-		scores = @population.map { |instance| puts instance; [instance, instance.score] }.sort { |a,b| b[1] <=> a[1] }	
+		scores = @population.map { |instance| [instance, instance.score] }.sort { |a,b| b[1] <=> a[1] }	
 		elapsed = Time.now - start_time
 		STDERR.puts ""
 		STDERR.puts "#### Generation #{@generation} ####"
@@ -115,6 +115,7 @@ class World
 		else
 			@population.push @best[0]
 		end
+		@population.clear
 		[0,1].each { |i| @population.push scores[i][0] }
 		(@popsize-2-@mutants).times { @population.push Instance.breed(@population[0],@population[1]) }
 		@population.each_with_index { |i,c| i.mutate!(0.33) if c > 1 }
@@ -133,6 +134,16 @@ class World
 		
 		@generation += 1
 	end
+end
+
+if __FILE__ == $0
+	pool = World.new(ARGV.shift,10,3)
+	100.times { pool.simulate_generation }
+	puts "-----------------------------------"
+	puts "Best result after #{pool.generation-1} generations:"
+	puts "Parameters: #{pool.best[0].to_s}"
+	puts "Score:      #{pool.best[1]}"
+end
 end
 
 if __FILE__ == $0
