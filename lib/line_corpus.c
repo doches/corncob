@@ -13,6 +13,9 @@ line_corpus_document *line_corpus_document_new(char *line, WordMap *wordmap)
 	char *delim = " \n";
 	char *word = strtok(line,delim);
 	do {
+		if (word == NULL) {
+			break;
+		}
 		unsigned int index = WordMap_index(wordmap,word);
 		word = strtok(NULL,delim);
 		new->words[new->length++] = index;
