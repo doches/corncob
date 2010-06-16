@@ -1,4 +1,5 @@
 #include "nlda2.h"
+#include <time.h>
 
 unsigned int reassess_window = 0;
 int main(int argc, char **argv)
@@ -15,6 +16,7 @@ int main(int argc, char **argv)
 	if(argc == 7) {
 		reassess_window = atoi(argv[6]);
 	}
+	srandom(time(NULL));
 	nLDA *model = nLDA_new(alpha,beta,gamma,argv[4]);
 	nLDA_train(model);
 	nLDA_dump(model,argv[5]);
