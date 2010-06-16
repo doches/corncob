@@ -78,7 +78,7 @@ void nLDA_dump(nLDA *model, char *filename)
 		fprintf(fout,"%d %d\n",w,best);
 	}
 	fclose(fout);
-	char wfname[80] = "";
+	char wfname[200] = "";
 	strcpy((char *)wfname,filename);
 	strcat((char *)wfname,".wordmap");
 	WordMap_dump(model->corpus->wordmap,wfname);
