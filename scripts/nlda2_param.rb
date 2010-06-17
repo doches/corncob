@@ -26,10 +26,10 @@ class Instance
 		gene = rand
 		if gene < 0.25
 			@alpha += (rand) * (rand < 0.5 ? -1 : 1)
-			@alpha = 0.001 if @alpha < 0.0
+			@alpha += rand if @alpha < 0.0
 		elsif gene < 0.5
 			@beta += (rand) * (rand < 0.5 ? -1 : 1)
-			@beta = 0.001 if @beta < 0.0
+			@beta = rand if (@beta < 0.0 or @beta > 1.0)
 		elsif gene < 0.75
 			@gamma += (rand) * (rand < 0.5 ? -1 : 1)
 			@gamma = 0.001 if @gamma < 0.0
@@ -109,10 +109,12 @@ class World
 		STDERR.puts "Elapsed: #{elapsed}"
 		scores.each { |i| STDERR.puts "#{i[0].to_s} \t#{i[1]}\t(#{i[0].elapsed}s)" }
 		STDERR.puts "-------------------------------"
+		@population.clear
 		if scores[0][1] > @best[1]
 			@best = scores[0].dup
+		else
+			@population.push @best[0]
 		end
-		@population.clear
 		[0,1].each { |i| @population.push scores[i][0] }
 		(@popsize-2-@mutants).times { @population.push Instance.breed(@population[0],@population[1]) }
 		@population.each_with_index { |i,c| i.mutate!(0.33) if c > 1 }
