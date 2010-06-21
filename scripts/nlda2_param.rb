@@ -29,7 +29,7 @@ class Instance
 			@alpha += rand if @alpha < 0.0
 		elsif gene < 0.5
 			@beta += (rand) * (rand < 0.5 ? -1 : 1)
-			@beta = rand if (@beta < 0.0 or @beta > 1.0)
+			@beta = rand*0.8+0.2 if (@beta < 0.2 or @beta > 1.0)
 		elsif gene < 0.75
 			@gamma += (rand) * (rand < 0.5 ? -1 : 1)
 			@gamma = 0.001 if @gamma < 0.0
@@ -64,7 +64,7 @@ class Instance
 	
 	def Instance.random
 		alpha = rand*10
-		beta = rand
+		beta = rand*0.8+0.2
 		gamma = rand
 		window = (rand*MaxWindow).to_i
 		
@@ -102,7 +102,7 @@ class World
 	
 	def simulate_generation
 		start_time = Time.now
-		scores = @population.map { |instance| [instance, instance.score] }.sort { |a,b| b[1] <=> a[1] }	
+		scores = @population.map { |instance| puts instance; [instance, instance.score] }.sort { |a,b| b[1] <=> a[1] }	
 		elapsed = Time.now - start_time
 		STDERR.puts ""
 		STDERR.puts "#### Generation #{@generation} ####"
