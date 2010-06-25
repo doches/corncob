@@ -77,7 +77,11 @@ line_corpus *line_corpus_new(char *filename)
 		last = doc;
 
 		new->document_count++;
+		if (new->document_count > 0 && new->document_count % 10000 == 0) {
+			fprintf(stderr,".");
+		}
 	}
+	fprintf(stderr,"\n");
 	fclose(fin);
 	
 	return new;
