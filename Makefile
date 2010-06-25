@@ -2,7 +2,7 @@
 
 CC = gcc
 CFLAGS = -g -std=c99 -Wall -I lib/ -I vendor/include/ -I tools/
-EXECUTABLES = lda rmc wordcount ctools_test nlda
+EXECUTABLES = lda rmc wordcount ctools_test nlda nlda2
 HEADERS = lib/corpus.h lib/ct_hash.h lib/SparseCounts.h lib/word_hash.h lib/WordMap.h tools/lda.h tools/rmc.h lib/count_list.h lib/context_corpus.h vendor/include/progressbar.h tools/nlda.h
 
 # Test target (default)
@@ -100,6 +100,12 @@ nlda2.o: tools/nlda2.h tools/nlda2.c
 
 nlda2: line_corpus.o progressbar.o WordMap.o SparseCounts.o ct_hash.o word_hash.o Instance.o nlda2.o count_list.o
 	$(CC) $(CFLAGS) line_corpus.o progressbar.o WordMap.o SparseCounts.o ct_hash.o word_hash.o Instance.o nlda2.o count_list.o -o nlda2
+	
+gen_sv: gen_sv.o line_corpus.o progressbar.o WordMap.o SparseCounts.o ct_hash.o word_hash.o count_list.o
+	$(CC) $(CFLAGS) gen_sv.o line_corpus.o progressbar.o WordMap.o SparseCounts.o ct_hash.o word_hash.o count_list.o -o gen_sv
+
+gen_sv.o: tools/gen_sv.c
+	$(CC) -c $(CFLAGS) tools/gen_sv.c
 
 # Clean target
 clean:
