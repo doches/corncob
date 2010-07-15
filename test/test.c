@@ -16,6 +16,7 @@
 #include "line_corpus_test.h"
 #include "unsigned_array_test.h"
 #include "cosine_test.h"
+#include "double_matrix_test.h"
 
 int main (int argc, const char * argv[]) {
 	
@@ -28,6 +29,7 @@ int main (int argc, const char * argv[]) {
     DO_TEST("unsigned_array",test_unsigned_array);
     DO_TEST("cosine",test_cosine);
 	DO_TEST("line_corpus",test_line_corpus);
+    DO_TEST("double_matrix",test_double_matrix);
 	
 	printf("Pass\n");
     return 0;

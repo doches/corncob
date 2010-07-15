@@ -14,6 +14,7 @@
 #include "unsigned_array.h"
 #include "progressbar.h"
 #include "ct_hash.h"
+#include "double_matrix.h"
 
 typedef struct OCW_t
 {
@@ -28,6 +29,9 @@ typedef struct OCW_t
     // Category assigments
     unsigned_array *assignments;
     unsigned int num_categories;
+    
+    // Distances
+    double_matrix *distances;
 } OCW;
 
 OCW *OCW_new(char *filename);
