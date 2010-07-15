@@ -29,4 +29,5 @@ fout.puts categories.to_yaml
 fout.close
 
 score = `clusterval -s -g scripts/#{fake ? 'fake.yaml' : 'mcrae.cluster'} -c #{results}.yaml`
+
 puts score
