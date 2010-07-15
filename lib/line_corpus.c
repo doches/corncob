@@ -65,6 +65,7 @@ line_corpus *line_corpus_new(char *filename)
 	FILE *fin = fopen(filename,"r");
 	char line[READLINE_LENGTH];
 
+    statusbar *progress = statusbar_new("Reading corpus");
 	while(!feof(fin)) {
 		fgets(line, READLINE_LENGTH, fin);
 		
@@ -77,11 +78,11 @@ line_corpus *line_corpus_new(char *filename)
 		last = doc;
 
 		new->document_count++;
-		if (new->document_count > 0 && new->document_count % 10000 == 0) {
-			fprintf(stderr,".");
+		if (new->document_count > 0 && new->document_count % 1000 == 0) {
+            statusbar_inc(progress);
 		}
 	}
-	fprintf(stderr,"\n");
+    statusbar_finish(progress);
 	fclose(fin);
 	
 	return new;

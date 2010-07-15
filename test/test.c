@@ -14,6 +14,8 @@
 #include "WordMap_test.h"
 #include "context_corpus_test.h"
 #include "line_corpus_test.h"
+#include "unsigned_array_test.h"
+#include "cosine_test.h"
 
 int main (int argc, const char * argv[]) {
 	
@@ -23,6 +25,8 @@ int main (int argc, const char * argv[]) {
 	DO_TEST("word_hash",test_word_hash);
 	DO_TEST("WordMap",test_WordMap);
 //	DO_TEST("context_corpus",test_context_corpus);
+    DO_TEST("unsigned_array",test_unsigned_array);
+    DO_TEST("cosine",test_cosine);
 	DO_TEST("line_corpus",test_line_corpus);
 	
 	printf("Pass\n");

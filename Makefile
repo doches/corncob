@@ -1,20 +1,26 @@
 # Makefile for lda-c and assorted tools (int->int hash, string->int hash, sparsecount, etc.)
 
 CC = gcc
-CFLAGS = -g -std=c99 -Wall -I lib/ -I vendor/include/ -I tools/
-EXECUTABLES = lda rmc wordcount ctools_test nlda nlda2
-HEADERS = lib/corpus.h lib/ct_hash.h lib/SparseCounts.h lib/word_hash.h lib/WordMap.h tools/lda.h tools/rmc.h lib/count_list.h lib/context_corpus.h vendor/include/progressbar.h tools/nlda.h
+CFLAGS = -g -std=c99 -Wall -I lib/ -I vendor/include/ -I tools/ -Werror -O2
+EXECUTABLES = lda rmc wordcount ctools_test nlda nlda2 ocw gen_sv
+HEADERS = lib/corpus.h lib/ct_hash.h lib/SparseCounts.h lib/word_hash.h lib/WordMap.h tools/lda.h tools/rmc.h lib/count_list.h lib/context_corpus.h vendor/include/progressbar.h tools/nlda.h vendor/include/statusbar.h
 
 # Test target (default)
-test: ct_hash_test.o word_hash_test.o corpus_test.o SparseCounts_test.o WordMap_test.o test.o context_corpus_test.o line_corpus_test.o
-	$(CC) $(CFLAGS) test.o word_hash_test.o ct_hash_test.o corpus_test.o SparseCounts_test.o WordMap_test.o WordMap.o word_hash.o ct_hash.o corpus.o SparseCounts.o context_corpus.o context_corpus_test.o progressbar.o line_corpus_test.o line_corpus.o -o ctools_test
+test: ct_hash_test.o word_hash_test.o corpus_test.o SparseCounts_test.o WordMap_test.o test.o context_corpus_test.o line_corpus_test.o unsigned_array_test.o cosine_test.o
+	$(CC) $(CFLAGS) test.o word_hash_test.o ct_hash_test.o corpus_test.o SparseCounts_test.o WordMap_test.o WordMap.o word_hash.o ct_hash.o corpus.o SparseCounts.o context_corpus.o context_corpus_test.o progressbar.o line_corpus_test.o line_corpus.o statusbar.o unsigned_array.o unsigned_array_test.o cosine_test.o cosine.o -o ctools_test
 	./ctools_test
 	
 ctools_test: test
 
 test.o: test/test.c test/test.h
 	$(CC) -c $(CFLAGS) test/test.c
+
+cosine_test.o: cosine.o test/cosine_test.h test/cosine_test.c
+	$(CC) -c $(CFLAGS) test/cosine_test.c
 	
+unsigned_array_test.o: unsigned_array.o test/unsigned_array_test.h test/unsigned_array_test.c
+	$(CC) -c $(CFLAGS) test/unsigned_array_test.c
+
 context_corpus_test.o: context_corpus.o test/context_corpus_test.h test/context_corpus_test.c
 	$(CC) -c $(CFLAGS) test/context_corpus_test.c
 
@@ -33,7 +39,7 @@ SparseCounts_test.o: SparseCounts.o test/SparseCounts_test.c test/SparseCounts_t
 WordMap_test.o: WordMap.o test/WordMap_test.c test/WordMap_test.h
 	$(CC) -c $(CFLAGS) test/WordMap_test.c
 
-line_corpus_test.o: line_corpus.o test/line_corpus_test.h test/line_corpus_test.c
+line_corpus_test.o: line_corpus.o test/line_corpus_test.h test/line_corpus_test.c statusbar.o
 	$(CC) -c $(CFLAGS) test/line_corpus_test.c
 
 # LDA target
@@ -85,6 +91,9 @@ context_corpus.o: lib/context_corpus.h lib/context_corpus.c progressbar.o
 progressbar.o: vendor/lib/progressbar.c vendor/include/progressbar.h
 	$(CC) -c $(CFLAGS) vendor/lib/progressbar.c
 
+statusbar.o: vendor/lib/statusbar.c vendor/include/statusbar.h
+	$(CC) -c $(CFLAGS) vendor/lib/statusbar.c
+
 nlda.o: tools/nlda.h tools/nlda.c
 	$(CC) -c $(CFLAGS) tools/nlda.c
 
@@ -92,20 +101,37 @@ nlda: context_corpus.o progressbar.o nlda.o WordMap.o SparseCounts.o ct_hash.o w
 	$(CC) $(CFLAGS) WordMap.o SparseCounts.o word_hash.o ct_hash.o Instance.o count_list.o context_corpus.o progressbar.o nlda.o -o nlda
 
 # nLDA2 target
-line_corpus.o: lib/line_corpus.h lib/line_corpus.c
+line_corpus.o: lib/line_corpus.h lib/line_corpus.c statusbar.o
 	$(CC) -c $(CFLAGS) lib/line_corpus.c
 
 nlda2.o: tools/nlda2.h tools/nlda2.c
 	$(CC) -c $(CFLAGS) tools/nlda2.c
 
-nlda2: line_corpus.o progressbar.o WordMap.o SparseCounts.o ct_hash.o word_hash.o Instance.o nlda2.o count_list.o
-	$(CC) $(CFLAGS) line_corpus.o progressbar.o WordMap.o SparseCounts.o ct_hash.o word_hash.o Instance.o nlda2.o count_list.o -o nlda2
+nlda2: line_corpus.o progressbar.o WordMap.o SparseCounts.o ct_hash.o word_hash.o Instance.o nlda2.o count_list.o statusbar.o
+	$(CC) $(CFLAGS) line_corpus.o progressbar.o WordMap.o SparseCounts.o ct_hash.o word_hash.o Instance.o nlda2.o count_list.o statusbar.o -o nlda2
 	
-gen_sv: gen_sv.o line_corpus.o progressbar.o WordMap.o SparseCounts.o ct_hash.o word_hash.o count_list.o
-	$(CC) $(CFLAGS) gen_sv.o line_corpus.o progressbar.o WordMap.o SparseCounts.o ct_hash.o word_hash.o count_list.o -o gen_sv
+gen_sv: gen_sv.o line_corpus.o progressbar.o WordMap.o SparseCounts.o ct_hash.o word_hash.o count_list.o statusbar.o
+	$(CC) $(CFLAGS) gen_sv.o line_corpus.o progressbar.o WordMap.o SparseCounts.o ct_hash.o word_hash.o count_list.o statusbar.o -o gen_sv
 
 gen_sv.o: tools/gen_sv.c
 	$(CC) -c $(CFLAGS) tools/gen_sv.c
+
+ocw: line_corpus.o progressbar.o WordMap.o SparseCounts.o ct_hash.o word_hash.o ocw.o statusbar.o target_corpus.o unsigned_array.o ct_hash.o cosine.o
+	$(CC) $(CFLAGS) line_corpus.o progressbar.o WordMap.o SparseCounts.o ct_hash.o word_hash.o ocw.o statusbar.o target_corpus.o unsigned_array.o cosine.o -o ocw
+
+ocw.o: tools/ocw.h tools/ocw.c
+	$(CC) -c $(CFLAGS) tools/ocw.c
+
+target_corpus.o: lib/target_corpus.c lib/target_corpus.h
+	$(CC) -c $(CFLAGS) lib/target_corpus.c
+
+unsigned_array.o: lib/unsigned_array.c lib/unsigned_array.h
+	$(CC) -c $(CFLAGS) lib/unsigned_array.c
+
+cosine.o: lib/cosine.c lib/cosine.h
+	$(CC) -c $(CFLAGS) lib/cosine.c
+
+.PHONY: clean doc all
 
 # Clean target
 clean:

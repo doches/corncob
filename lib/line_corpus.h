@@ -5,9 +5,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "WordMap.h"
+#include "statusbar.h"
 
 #define DEFAULT_DOCUMENT_SIZE 32
+
+#ifndef READLINE_LENGTH
 #define READLINE_LENGTH 1000
+#endif
+
 #define LINE_CORPUS_WORDMAP_BUCKETS 128
 
 typedef struct line_corpus_document_t

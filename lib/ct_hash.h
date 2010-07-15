@@ -8,10 +8,7 @@
  */
 
 #include <stdlib.h>
-
-#ifdef DEBUG
 #include <stdio.h>
-#endif
 
 #ifndef CT_HASH
 #define CT_HASH
@@ -41,6 +38,7 @@ hash_element *hash_add(ct_hash *map,int key,unsigned int value);
 void hash_foreach(ct_hash *map,void (*callback)(hash_element *));
 void hash_free(ct_hash *map);
 hash_element *hash_update(ct_hash *map, int key, int change);
+hash_element *hash_reverse_lookup(ct_hash *map, int value);
 
 #endif
 
