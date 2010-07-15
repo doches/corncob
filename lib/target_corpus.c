@@ -117,3 +117,4 @@ void target_corpus_free(target_corpus *corpus)
 	WordMap_free(corpus->wordmap);
 	free(corpus);
 }
+

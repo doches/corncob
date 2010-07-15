@@ -44,3 +44,4 @@ void target_corpus_each_document(target_corpus *corpus, void (*document_callback
 void target_corpus_free(target_corpus *corpus);
 
 #endif
+

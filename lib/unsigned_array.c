@@ -78,3 +78,4 @@ void unsigned_array_free(unsigned_array *uarray)
     free(uarray->data);
     free(uarray);
 }
+

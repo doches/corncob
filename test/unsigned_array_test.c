@@ -25,3 +25,4 @@ void test_unsigned_array()
     assert(unsigned_array_get(uarray, 0) == 33);
     assert(unsigned_array_get_zero(uarray, 0) == 33);
 }
+

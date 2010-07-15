@@ -16,3 +16,4 @@
 void test_cosine();
 
 #endif
+

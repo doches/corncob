@@ -103,3 +103,4 @@ void line_corpus_free(line_corpus *corpus)
 	WordMap_free(corpus->wordmap);
 	free(corpus);
 }
+

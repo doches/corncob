@@ -49,3 +49,4 @@ double dot_ua(unsigned_array *a, unsigned_array *b)
     }
     return sum;
 }
+

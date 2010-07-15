@@ -15,3 +15,4 @@ double cosine(unsigned int *a, unsigned int *b, unsigned int length);
 double cosine_ua(unsigned_array *a, unsigned_array *b);
 double magnitude_ua(unsigned_array *a);
 double dot_ua(unsigned_array *a, unsigned_array *b);
+

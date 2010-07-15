@@ -24,3 +24,4 @@ void test_cosine()
     assert(dot_ua(ua,ua) == (4*4+5*5+6*6));
     assert(magnitude_ua(ua) == pow(77.0,0.5));
 }
+

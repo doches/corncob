@@ -185,3 +185,4 @@ void OCW_dump(OCW *model)
         printf("%d %d\n",hash_reverse_lookup(model->index_to_target, i)->key,unsigned_array_get_zero(model->assignments, i));
     }
 }
+
