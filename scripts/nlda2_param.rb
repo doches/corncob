@@ -97,11 +97,7 @@ class Instance
 	
 	def Instance.random
 		alpha = rand*10
-<<<<<<< HEAD
 		beta = rand*0.8+0.2
-=======
-		beta = rand*0.95+0.5
->>>>>>> .
 		gamma = rand
 		window = (rand*MaxWindow).to_i
 		
@@ -136,7 +132,7 @@ class World
 		end
 		
 		`mkdir #{Instance.input}.results/` if not File.exists?("#{Instance.input}.results/")
-		@hosts = IO.readlines("scripts/hosts.#{@input}").map { |x| x.strip }
+#		#@hosts = IO.readlines("scripts/hosts.#{@input}").map { |x| x.strip }
 	end
 	
 	def simulate_generation
@@ -224,16 +220,6 @@ end
 
 if __FILE__ == $0
 	pool = World.new(ARGV.shift,6,3)
-	100.times { pool.simulate_generation }
-	puts "-----------------------------------"
-	puts "Best result after #{pool.generation-1} generations:"
-	puts "Parameters: #{pool.best[0].to_s}"
-	puts "Score:      #{pool.best[1]}"
-end
-end
-
-if __FILE__ == $0
-	pool = World.new(ARGV.shift,10,3)
 	100.times { pool.simulate_generation }
 	puts "-----------------------------------"
 	puts "Best result after #{pool.generation-1} generations:"

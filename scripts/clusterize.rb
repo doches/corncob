@@ -1,6 +1,8 @@
 require 'yaml'
 
-words = IO.readlines("ocw.wordmap").map { |x| x.strip.split(" ") }.map { |pair| [pair[0].to_i,pair[1]] }
+wordmap = ARGV.size > 1 ? ARGV.shift : "ocw.wordmap"
+
+words = IO.readlines(wordmap).map { |x| x.strip.split(" ") }.map { |pair| [pair[0].to_i,pair[1]] }
 wordmap = {}
 words.each { |pair| wordmap[pair[0]] = pair[1] }
 

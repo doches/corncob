@@ -32,6 +32,7 @@ OCW *OCW_new(char *filename)
 {
     OCW *model = (OCW *)malloc(sizeof(OCW));
     model->corpus = target_corpus_new(filename);
+    model->corpus_filename = filename;
     model->num_targets = 0;
     model->max_targets = 32;
     model->targets = (unsigned_array **)malloc(sizeof(unsigned_array *)*model->max_targets);
@@ -65,9 +66,12 @@ unsigned_array *OCW_get_target(OCW *model, unsigned int word_index)
         {
             unsigned_array **new_targets = (unsigned_array **)malloc(sizeof(unsigned_array *)*model->max_targets*2);
             memcpy(new_targets,model->targets,sizeof(unsigned_array *)*model->max_targets);
+            for(int i=model->max_targets;i<model->max_targets*2;i++) {
+            	//new_targets[i] = unsigned_array_new(32);
+            }
             free(model->targets);
             model->targets = new_targets;
-            new_targets+=1;
+            //new_targets+=1;
             model->max_targets *= 2;
         }
         model->targets[elem->value] = unsigned_array_new(32);
@@ -91,10 +95,10 @@ void OCW_each_document(unsigned int target, unsigned int *words, unsigned int le
         double_matrix_set(static_ocw_model->distances,i,t_index,distance);
         double_matrix_set(static_ocw_model->distances,t_index,i,distance);
     }
-    //    printf("\n");
     //    double_matrix_print(static_ocw_model->distances);
     OCW_train_step(static_ocw_model);
     progressbar_inc(static_progress);
+    document_index++;
 }
 
 // Helper function for shuffling an array.
@@ -112,7 +116,6 @@ void OCW_shuffle(unsigned int *array, unsigned int n)
     }
 }
 
-
 /* Do a single training step for an OCW model. 
  * 
  *   1. Assign a unique class to any new items.
@@ -121,6 +124,7 @@ void OCW_shuffle(unsigned int *array, unsigned int n)
  */
 void OCW_train_step(OCW *model)
 {
+//    fprintf(stderr,"  CW");
     // Randomize order
     unsigned int *order = (unsigned int *)malloc(sizeof(unsigned int)*model->num_targets);
     for (int i=0; i<model->num_targets; i++) {
@@ -147,8 +151,9 @@ void OCW_train_step(OCW *model)
             }
         }
         unsigned_array_set(model->assignments, i, unsigned_array_get(model->assignments, closest));
+//        fprintf(stderr,".");
     }
-    
+//    fprintf(stderr,"!\n");
     free(order);
 }
 
@@ -186,7 +191,9 @@ void OCW_dump(OCW *model)
         }
     }
     */
-    WordMap_dump(model->corpus->wordmap, "ocw.wordmap");
+    char *wordmap_f = (char *)malloc(strlen(model->corpus_filename)+9);
+    sprintf(wordmap_f,"%s.wordmap",model->corpus_filename);
+    WordMap_dump(model->corpus->wordmap, wordmap_f);
     
     for (int i=0; i<model->assignments->size; i++) {
         printf("%d %d\n",hash_reverse_lookup(model->index_to_target, i)->key,unsigned_array_get_zero(model->assignments, i));

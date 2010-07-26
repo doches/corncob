@@ -20,6 +20,7 @@ typedef struct OCW_t
 {
     target_corpus *corpus;
     ct_hash *index_to_target;
+    char *corpus_filename;
     
     // Store target-word co-occurrence matrix in an array of arrays.
     unsigned_array **targets;

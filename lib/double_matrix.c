@@ -106,3 +106,4 @@ void double_matrix_print(double_matrix *matrix)
     }
     printf("\n");
 }
+

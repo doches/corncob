@@ -1,5 +1,6 @@
 #include "nlda2.h"
 #include <time.h>
+#include <stdlib.h>
 
 unsigned int reassess_window = 0;
 int main(int argc, char **argv)

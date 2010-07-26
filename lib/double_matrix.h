@@ -27,3 +27,4 @@ double double_matrix_get(double_matrix *matrix, unsigned int row, unsigned int c
 double double_matrix_get_zero(double_matrix *matrix, unsigned int row, unsigned int col);
 void double_matrix_free(double_matrix *matrix);
 void double_matrix_print(double_matrix *matrix);
+

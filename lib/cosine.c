@@ -44,7 +44,13 @@ double dot(unsigned int *a, unsigned int *b, unsigned int length)
 
 double magnitude_ua(unsigned_array *a)
 {
-    return pow(dot_ua(a,a),0.5);
+		double dot = dot_ua(a,a);
+		if(dot == 0.0) {
+			printf("Zero magnitude!\n");
+			unsigned_array_print(a);
+			exit(1);
+		}
+		return pow(dot,0.5);
 }
 
 double cosine_ua(unsigned_array *a, unsigned_array *b)
@@ -54,7 +60,7 @@ double cosine_ua(unsigned_array *a, unsigned_array *b)
 
 double dot_ua(unsigned_array *a, unsigned_array *b)
 {
-    /*
+		/*
     double sum = 0.0;
     unsigned int max = a->size > b->size ? a->size : b->size;
     for (int i=0; i<max; i++) {

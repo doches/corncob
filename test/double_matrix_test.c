@@ -8,12 +8,15 @@
  */
 
 #include "double_matrix_test.h"
+#include <math.h>
 
 void test_double_matrix()
 {
+		const double epsilon = 0.0001;
+		
     double_matrix *matrix = double_matrix_new(4,4,0.0);
     
-    assert(0.0 == double_matrix_get_zero(matrix, 0, 0));
+    assert(abs(double_matrix_get_zero(matrix, 0, 0)) < epsilon);
     double_matrix_set(matrix, 0, 0, 1.0);
     assert(1.0 == double_matrix_get_zero(matrix, 0, 0));
     double_matrix_set(matrix, 8, 8, 2.0);
@@ -32,3 +35,4 @@ void test_double_matrix()
     
     double_matrix_free(matrix);
 }
+

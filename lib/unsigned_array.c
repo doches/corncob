@@ -15,6 +15,7 @@ unsigned_array *unsigned_array_new(unsigned int max)
     unsigned_array *new = (unsigned_array *)malloc(sizeof(unsigned_array));
     new->max = max;
     new->data = (unsigned int *)malloc(sizeof(unsigned int)*(new->max));
+    new->size = 0;
     memset(new->data,0x0,sizeof(unsigned int)*new->max);
     return new;
 }
@@ -31,6 +32,7 @@ unsigned int *unsigned_array_get_pointer(unsigned_array *uarray, unsigned int in
         memcpy(new_data,uarray->data,sizeof(unsigned int)*uarray->max);
         free(uarray->data);
         uarray->data = new_data;
+        uarray->max = new_max;
     }
     return &(uarray->data[index]);
 }
