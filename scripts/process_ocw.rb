@@ -2,7 +2,12 @@
 require 'yaml'
 
 input = ARGV.shift
-wordmap = "#{input.gsub('.ocw','')}.target_corpus.wordmap"
+wordmap = nil
+if ARGV.empty?
+	wordmap = "#{input.gsub('.ocw','')}.target_corpus.wordmap"
+else
+	wordmap = ARGV.shift
+end
 
 words = IO.readlines(wordmap).map { |x| x.strip.split(" ") }.map { |pair| [pair[0].to_i,pair[1]] }
 wordmap = {}

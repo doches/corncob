@@ -66,9 +66,9 @@ unsigned_array *OCW_get_target(OCW *model, unsigned int word_index)
         {
             unsigned_array **new_targets = (unsigned_array **)malloc(sizeof(unsigned_array *)*model->max_targets*2);
             memcpy(new_targets,model->targets,sizeof(unsigned_array *)*model->max_targets);
-            for(int i=model->max_targets;i<model->max_targets*2;i++) {
+            //for(int i=model->max_targets;i<model->max_targets*2;i++) {
             	//new_targets[i] = unsigned_array_new(32);
-            }
+            //}
             free(model->targets);
             model->targets = new_targets;
             //new_targets+=1;
@@ -85,6 +85,8 @@ progressbar *static_progress;
 int document_index;
 void OCW_each_document(unsigned int target, unsigned int *words, unsigned int length)
 {
+    if(length < 1)
+    	return;
     unsigned_array *representation = OCW_get_target(static_ocw_model, target);
     for (int i=0; i<length; i++) {
         unsigned_array_add(representation, words[i], 1);
@@ -164,7 +166,6 @@ void OCW_train(OCW *model)
     document_index = 0;
     target_corpus_each_document(model->corpus, &OCW_each_document);
     progressbar_finish(static_progress);
-    /*
     int cw_step = 1;
     progressbar *cw = progressbar_new("Clustering", cw_step);
     for (int i=0; i<cw_step; i++) {
@@ -172,7 +173,6 @@ void OCW_train(OCW *model)
         progressbar_inc(cw);
     }
     progressbar_finish(cw);
-    */
     static_ocw_model = NULL;
 }
 
