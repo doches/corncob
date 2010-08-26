@@ -166,6 +166,7 @@ void OCW_train(OCW *model)
     document_index = 0;
     target_corpus_each_document(model->corpus, &OCW_each_document);
     progressbar_finish(static_progress);
+    /*
     int cw_step = 1;
     progressbar *cw = progressbar_new("Clustering", cw_step);
     for (int i=0; i<cw_step; i++) {
@@ -173,6 +174,7 @@ void OCW_train(OCW *model)
         progressbar_inc(cw);
     }
     progressbar_finish(cw);
+     */
     static_ocw_model = NULL;
 }
 
