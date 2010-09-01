@@ -7,11 +7,11 @@ ifeq ($(UNAME),Linux)
 CFLAGS = -g -std=gnu99 -Wall -I lib/ -I vendor/include/ -I tools/ -Werror -O2 -Wno-unused-result
 endif
 ifeq ($(UNAME),Darwin)
-CFLAGS = -g -std=gnu99 -Wall -I lib/ -I vendor/include/ -I tools/ -Werror -O2
+CFLAGS = -std=gnu99 -Wall -I lib/ -I vendor/include/ -I tools/ -Werror -O2
 endif
 
 LFLAGS = -lm
-EXECUTABLES = lda rmc wordcount ctools_test nlda nlda2 ocw gen_sv
+EXECUTABLES = lda rmc wordcount ctools_test nlda nlda2 ocw gen_sv focw
 HEADERS = lib/corpus.h lib/ct_hash.h lib/SparseCounts.h lib/word_hash.h lib/WordMap.h tools/lda.h tools/rmc.h lib/count_list.h lib/context_corpus.h vendor/include/progressbar.h tools/nlda.h vendor/include/statusbar.h
 
 TEST := ${wildcard test/*.c}
@@ -150,6 +150,16 @@ unsigned_array.o: lib/unsigned_array.c lib/unsigned_array.h
 
 cosine.o: lib/cosine.c lib/cosine.h
 	$(CC) -c $(CFLAGS) lib/cosine.c
+	
+# FoCW target
+focw: focw.o LSH.o target_corpus.o WordMap.o progressbar.o statusbar.o unsigned_array.o word_hash.o
+	$(CC) $(LFLAGS) -lgsl target_corpus.o WordMap.o progressbar.o statusbar.o focw.o unsigned_array.o word_hash.o LSH.o -o focw
+
+focw.o: tools/focw.h tools/focw.c
+	$(CC) $(CFLAGS) -c tools/focw.c
+
+LSH.o: lib/LSH.h lib/LSH.c
+	$(CC) $(CFLAGS) -c lib/LSH.c
 
 .PHONY: clean doc all
 

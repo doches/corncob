@@ -34,14 +34,14 @@ OCW *OCW_new(char *filename)
     model->corpus = target_corpus_new(filename);
     model->corpus_filename = filename;
     model->num_targets = 0;
-    model->max_targets = 32;
+    model->max_targets = 512;
     model->targets = (unsigned_array **)malloc(sizeof(unsigned_array *)*model->max_targets);
     model->index_to_target = hash_new(2);
     
     model->num_categories = 0;
-    model->assignments = unsigned_array_new(32);
+    model->assignments = unsigned_array_new(512);
     
-    model->distances = double_matrix_new(256, 256, 0.0);
+    model->distances = double_matrix_new(512, 512, 0.0);
     
     return model;
 }
@@ -98,7 +98,10 @@ void OCW_each_document(unsigned int target, unsigned int *words, unsigned int le
         double_matrix_set(static_ocw_model->distances,t_index,i,distance);
     }
     //    double_matrix_print(static_ocw_model->distances);
-    OCW_train_step(static_ocw_model);
+    if (document_index % 100 == 0) {
+        OCW_train_step(static_ocw_model);
+        double_matrix_print(static_ocw_model->distances);
+    }
     progressbar_inc(static_progress);
     document_index++;
 }
@@ -152,10 +155,11 @@ void OCW_train_step(OCW *model)
                 }
             }
         }
-        unsigned_array_set(model->assignments, i, unsigned_array_get(model->assignments, closest));
-//        fprintf(stderr,".");
+        if (distance > 0.0 && closest != i) {
+//            printf("%d becomes %d (was %d) (neighbor: %d)\n",i,unsigned_array_get(model->assignments, closest),unsigned_array_get(model->assignments, i),closest);
+            unsigned_array_set(model->assignments, i, unsigned_array_get(model->assignments, closest));
+        }
     }
-//    fprintf(stderr,"!\n");
     free(order);
 }
 

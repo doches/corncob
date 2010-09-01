@@ -16,9 +16,9 @@
 #include "WordMap.h"
 #include "statusbar.h"
 
-#define DEFAULT_DOCUMENT_SIZE 32
+#define DEFAULT_DOCUMENT_SIZE 8
 #define READLINE_LENGTH 1000
-#define TARGET_CORPUS_WORDMAP_BUCKETS 256
+#define TARGET_CORPUS_WORDMAP_BUCKETS 512
 
 typedef struct target_corpus_document_t
 {
