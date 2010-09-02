@@ -7,10 +7,10 @@ ifeq ($(UNAME),Linux)
 CFLAGS = -g -std=gnu99 -Wall -I lib/ -I vendor/include/ -I tools/ -Werror -O2 -Wno-unused-result
 endif
 ifeq ($(UNAME),Darwin)
-CFLAGS = -std=gnu99 -Wall -I lib/ -I vendor/include/ -I tools/ -Werror -O2
+CFLAGS = -std=gnu99 -Wall -I lib/ -I vendor/include/ -I tools/ -Werror -g -pg
 endif
 
-LFLAGS = -lm
+LFLAGS = -lm -g -pg
 EXECUTABLES = lda rmc wordcount ctools_test nlda nlda2 ocw gen_sv focw
 HEADERS = lib/corpus.h lib/ct_hash.h lib/SparseCounts.h lib/word_hash.h lib/WordMap.h tools/lda.h tools/rmc.h lib/count_list.h lib/context_corpus.h vendor/include/progressbar.h tools/nlda.h vendor/include/statusbar.h
 

@@ -30,6 +30,7 @@ typedef struct FoCW_t
     unsigned int next_category;
     
     double *unit_vectors[PRECISION];
+    unsigned int k;
 } FoCW;
 
 FoCW *FoCW_new(const char *filename);

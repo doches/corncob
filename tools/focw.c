@@ -32,6 +32,7 @@ FoCW *FoCW_new(const char *filename)
         model->categories[i] = -1;
     }
     model->next_category = 0;
+    model->k = 0;
     
     LSH_setup();
     
@@ -74,8 +75,11 @@ void FoCW_each_document(unsigned int target, unsigned int *words, unsigned int l
     FoCW_shuffle(order, static_model->num_targets);
         // Get d symmetric random unit vectors
     unsigned int k = static_model->corpus->wordmap->size;
-    for (int i=0; i<PRECISION; i++) {
-        static_model->unit_vectors[i] = LSH_gen_unit_vector(k);
+    if (k != static_model->k) {
+        for (int i=0; i<PRECISION; i++) {
+            static_model->unit_vectors[i] = LSH_gen_unit_vector(k);
+        }
+        static_model->k = k;
     }
     for (int j=0; j<static_model->num_targets; j++) {
         target = order[j];
@@ -85,7 +89,8 @@ void FoCW_each_document(unsigned int target, unsigned int *words, unsigned int l
         unsigned int target_signature = LSH_signature(rep, static_model->unit_vectors, k);
         for (int i=0; i<static_model->num_targets; i++) {
             if(i != target) {
-                unsigned_array *item = static_model->targets[order[i]];
+                unsigned_array *item = FoCW_get_target(static_model, i);
+
                 unsigned int item_signature = LSH_signature(item, static_model->unit_vectors, k);
                 unsigned int test_distance = LSH_distance(target_signature, item_signature);
                 if (test_distance < distance) {
@@ -96,8 +101,9 @@ void FoCW_each_document(unsigned int target, unsigned int *words, unsigned int l
         }
         
         // `closest' is the index of the closest item; assign its category to `target'
-        printf("%f\n",distance);
-        static_model->categories[target] = static_model->categories[closest];
+        if (closest != target) {
+            static_model->categories[target] = static_model->categories[closest];
+        }
     }
     
     progressbar_inc(static_progress);

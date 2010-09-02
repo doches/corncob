@@ -66,9 +66,9 @@ unsigned_array *OCW_get_target(OCW *model, unsigned int word_index)
         {
             unsigned_array **new_targets = (unsigned_array **)malloc(sizeof(unsigned_array *)*model->max_targets*2);
             memcpy(new_targets,model->targets,sizeof(unsigned_array *)*model->max_targets);
-            //for(int i=model->max_targets;i<model->max_targets*2;i++) {
-            	//new_targets[i] = unsigned_array_new(32);
-            //}
+            for(int i=model->max_targets;i<model->max_targets*2;i++) {
+            	new_targets[i] = unsigned_array_new(32);
+            }
             free(model->targets);
             model->targets = new_targets;
             //new_targets+=1;
@@ -91,17 +91,17 @@ void OCW_each_document(unsigned int target, unsigned int *words, unsigned int le
     for (int i=0; i<length; i++) {
         unsigned_array_add(representation, words[i], 1);
     }
+
     int t_index = hash_get(static_ocw_model->index_to_target, target)->value;
     for (int i=0; i<static_ocw_model->num_targets; i++) {
-        double distance = cosine_ua(static_ocw_model->targets[t_index], static_ocw_model->targets[i]);
+//        double distance = cosine_ua(static_ocw_model->targets[t_index], static_ocw_model->targets[i]);
+        double distance = manhattan(static_ocw_model->targets[t_index], static_ocw_model->targets[i]);
         double_matrix_set(static_ocw_model->distances,i,t_index,distance);
         double_matrix_set(static_ocw_model->distances,t_index,i,distance);
     }
-    //    double_matrix_print(static_ocw_model->distances);
-    if (document_index % 100 == 0) {
-        OCW_train_step(static_ocw_model);
-        double_matrix_print(static_ocw_model->distances);
-    }
+
+    OCW_train_step(static_ocw_model);
+
     progressbar_inc(static_progress);
     document_index++;
 }
@@ -143,20 +143,18 @@ void OCW_train_step(OCW *model)
     for (int ix=0; ix<model->num_targets; ix++) {
         i = order[ix];
         closest = i;
-        distance = 0.0;
+        distance = -2.0;
 
         for (int j=0; j<model->num_targets; j++) {
             if (i != j) {
                 double pairwise = double_matrix_get(model->distances,i,j);
-                
-                if (pairwise > distance) {
+                if (pairwise < distance) {
                     distance = pairwise;
                     closest = j;
                 }
             }
         }
         if (distance > 0.0 && closest != i) {
-//            printf("%d becomes %d (was %d) (neighbor: %d)\n",i,unsigned_array_get(model->assignments, closest),unsigned_array_get(model->assignments, i),closest);
             unsigned_array_set(model->assignments, i, unsigned_array_get(model->assignments, closest));
         }
     }

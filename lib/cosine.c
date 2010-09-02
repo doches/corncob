@@ -80,3 +80,11 @@ double dot_ua(unsigned_array *a, unsigned_array *b)
     return s1 + s2 + s3 + s4;
 }
 
+unsigned int manhattan(unsigned_array *a, unsigned_array *b)
+{
+    unsigned int distance = 0;
+    for (int i=0; i<a->size; i++) {
+        distance += abs(unsigned_array_get_zero(a, i) - unsigned_array_get_zero(b, i));
+    }
+    return distance;
+}
