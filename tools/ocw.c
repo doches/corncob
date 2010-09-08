@@ -93,14 +93,28 @@ void OCW_each_document(unsigned int target, unsigned int *words, unsigned int le
     }
 
     int t_index = hash_get(static_ocw_model->index_to_target, target)->value;
+    double best_distance = 0.0;
+    int best = target;
     for (int i=0; i<static_ocw_model->num_targets; i++) {
-//        double distance = cosine_ua(static_ocw_model->targets[t_index], static_ocw_model->targets[i]);
-        double distance = manhattan(static_ocw_model->targets[t_index], static_ocw_model->targets[i]);
+        double distance = cosine_ua(static_ocw_model->targets[t_index], static_ocw_model->targets[i]);
+//        double distance = manhattan(static_ocw_model->targets[t_index], static_ocw_model->targets[i]);
         double_matrix_set(static_ocw_model->distances,i,t_index,distance);
         double_matrix_set(static_ocw_model->distances,t_index,i,distance);
     }
 
-    OCW_train_step(static_ocw_model);
+//    OCW_train_step(static_ocw_model);
+    for (int j=0; j<model->num_targets; j++) {
+        if (target != j) {
+            double pairwise = double_matrix_get(model->distances,target,j);
+            if (pairwise > distance) {
+                distance = pairwise;
+                closest = j;
+            }
+        }
+    }
+    if (distance > 0.0 && closest != i) {
+        unsigned_array_set(model->assignments, i, unsigned_array_get(model->assignments, closest));
+    }
 
     progressbar_inc(static_progress);
     document_index++;
@@ -129,7 +143,6 @@ void OCW_shuffle(unsigned int *array, unsigned int n)
  */
 void OCW_train_step(OCW *model)
 {
-//    fprintf(stderr,"  CW");
     // Randomize order
     unsigned int *order = (unsigned int *)malloc(sizeof(unsigned int)*model->num_targets);
     for (int i=0; i<model->num_targets; i++) {
@@ -148,7 +161,7 @@ void OCW_train_step(OCW *model)
         for (int j=0; j<model->num_targets; j++) {
             if (i != j) {
                 double pairwise = double_matrix_get(model->distances,i,j);
-                if (pairwise < distance) {
+                if (pairwise > distance) {
                     distance = pairwise;
                     closest = j;
                 }

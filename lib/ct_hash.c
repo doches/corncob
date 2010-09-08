@@ -8,6 +8,7 @@
  */
 
 #include "ct_hash.h"
+#include <math.h>
 #include <assert.h>
 
 /*********** Hash Element **************/
@@ -99,7 +100,7 @@ hash_element *hash_get(ct_hash *map, int key)
 	unsigned int index = ct_h_hash(key, map->num_buckets);
 	hash_element *element = map->buckets[index];
 	if (element != NULL) {
-		while (element && element->key != key) {
+		while (element != NULL && element->key != key) {
 			element = element->next;
 		}
 	}
@@ -134,3 +135,35 @@ hash_element *hash_reverse_lookup(ct_hash *map, int value)
     return NULL;
 }
 
+double hash_dot_sum;
+ct_hash *hash_dot_other;
+void hash_dot_helper(hash_element *elem)
+{
+    hash_element *other = hash_get(hash_dot_other, elem->key);
+    if (other) {
+        hash_dot_sum += elem->value * other->value;
+    }
+}
+    
+
+double hash_dot(ct_hash *a, ct_hash *b)
+{
+    hash_dot_sum = 0.0;
+    hash_dot_other = b;
+    hash_foreach(a, &hash_dot_helper);
+    
+    return hash_dot_sum;
+}
+
+double hash_magnitude(ct_hash *a)
+{
+    return sqrt(hash_dot(a,a));
+}
+
+double hash_cosine(ct_hash *a, ct_hash *b)
+{
+    if (a->size < b->size) {
+        return hash_cosine(b,a);
+    }
+    return hash_dot(a,b) / (hash_magnitude(a) * hash_magnitude(b));
+}

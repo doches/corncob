@@ -7,7 +7,7 @@ ifeq ($(UNAME),Linux)
 CFLAGS = -g -std=gnu99 -Wall -I lib/ -I vendor/include/ -I tools/ -Werror -O2 -Wno-unused-result
 endif
 ifeq ($(UNAME),Darwin)
-CFLAGS = -std=gnu99 -Wall -I lib/ -I vendor/include/ -I tools/ -Werror -g -pg
+CFLAGS = -std=gnu99 -Wall -I lib/ -I vendor/include/ -I tools/ -Werror -O2
 endif
 
 LFLAGS = -lm -g -pg
@@ -152,8 +152,8 @@ cosine.o: lib/cosine.c lib/cosine.h
 	$(CC) -c $(CFLAGS) lib/cosine.c
 	
 # FoCW target
-focw: focw.o LSH.o target_corpus.o WordMap.o progressbar.o statusbar.o unsigned_array.o word_hash.o
-	$(CC) $(LFLAGS) -lgsl target_corpus.o WordMap.o progressbar.o statusbar.o focw.o unsigned_array.o word_hash.o LSH.o -o focw
+focw: focw.o LSH.o target_corpus.o WordMap.o progressbar.o statusbar.o unsigned_array.o word_hash.o ct_hash.o
+	$(CC) $(LFLAGS) -lgsl target_corpus.o WordMap.o progressbar.o statusbar.o focw.o unsigned_array.o word_hash.o LSH.o ct_hash.o -o focw
 
 focw.o: tools/focw.h tools/focw.c
 	$(CC) $(CFLAGS) -c tools/focw.c

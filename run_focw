@@ -1,0 +1,10 @@
+#!/usr/bin/env ruby
+# automate the running & evaluating of an FoCW run
+#
+# Usage: ./run_focw <path/to/target/corpus>
+
+input = ARGV.shift
+`./focw #{input} > #{input}.focw`
+`ruby scripts/apply_wordmap.rb #{input} | ruby scripts/evaluate.rb > #{input}.fscore`
+puts `cat #{input}.fscore`
+
