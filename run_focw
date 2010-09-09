@@ -1,13 +1,82 @@
 #!/usr/bin/env ruby
 # automate the running & evaluating of an FoCW run
 #
-# Usage: ./run_focw <path/to/target/corpus>
+# run_focw takes the name of a corpus (one of dependency, subjobj, sentence, and window),
+# a threshold (passed directly to focw), and an optional number indicating the # of lines
+# to be used in creating the subset corpus. For example:
+#
+#     ./run_focw window 50000 0.5
+#
+# creates a 50,000-line subset of the window corpus (from data/window.target_corpus) which
+# is stored in corpora/, then runs focw with that corpus (corpora/window.50k) and a 
+# threshold of 0.5. The resulting files (window.50k.ocw, window.50k.yaml, window.50k.fscore)
+# are stored in trials/
+#
+# Line counts can be abbreviated with a 'k' suffix, indicating that the provided number
+# should be multipled be 1000. Regardless, subset corpora (and associated data files) are
+# named using this style (if possible).
+#
+# You can also pass in a fourth parameter indicating the directory in which to store
+# created subset corpora and result files. By default, this directory is "./corpora"
 
+require 'fileutils'
+
+# Read input
 input = ARGV.shift
+subset = ARGV.empty? ? false : ARGV.shift
 threshold = ARGV.empty? ? "0.0" : ARGV.shift
-`./focw #{input} #{threshold}> #{input}.focw`
-threshold.gsub(".","_")
-`ruby scripts/apply_wordmap.rb #{input} | ruby scripts/evaluate.rb > #{input}.#{threshold}.fscore`
-`mv #{input}.focw #{input}.#{threshold}.focw`
-puts `cat #{input}.#{threshold}.fscore`
-`mv temp.yaml #{input}.#{threshold}.yaml`
+data_dir = ARGV.empty? ? "corpora" : ARGV.shift
+
+# Ensure that directories and tools exist
+FileUtils.mkdir(data_dir) if not File.exists?(data_dir)
+if not File.exists?("focw")
+	output = `make focw`
+	if output == ""
+		STDERR.puts "Attempt to build focw failed, bailing out."
+		exit(1)
+	end
+end
+
+# Make subset corpus
+filename = nil
+if subset
+	lines = subset
+	name = subset
+	# User requested a subset corpus be constructed
+	if subset =~ /^[0-9]+k$/ # line count in k notation
+		lines = subset.to_i * 1000
+	else # line count in integers
+		subset = subset.to_i
+		if subset > 1000 and subset % 1000 == 0 # if we can convert it to k notation, do so
+			name = "#{subset / 1000}k"
+		end
+	end
+	filename = "#{data_dir}/#{input}.#{subset}"
+	`head -n #{lines} < data/#{input}.target_corpus > #{data_dir}/#{input}.#{subset}` if not File.exists?("#{data_dir}/#{input}.#{subset}")
+else
+	subset = "all"
+	filename = "#{data_dir}/#{input}.#{subset}"
+	`ln -s data/#{input}.target_corpus #{data_dir}/#{input}.#{subset}` if not File.exists?("#{data_dir}/#{input}.#{subset}")
+end
+
+# Don't overwrite existing runs without confirmation...
+if File.exists?("#{filename}.#{threshold.gsub('.','_')}.focw")
+	print "#{filename}.focw already exists, continue? [y/N]: "
+	input = STDIN.getc.chr
+	if input != 'y' and input != 'Y'
+		exit(0)
+	end
+end
+
+# Ok, everything's all set up -- let's do the run
+`./focw #{filename} #{threshold} > #{filename}.focw`
+
+# Score the output and store it in #{data_dir}
+threshold = threshold.gsub(".","_")
+`ruby scripts/apply_wordmap.rb #{filename} | ruby scripts/evaluate.rb > #{filename}.#{threshold}.fscore`
+`mv #{filename}.focw #{filename}.#{threshold}.focw`
+`mv temp.yaml #{filename}.#{threshold}.yaml`
+
+# Print the score, since user probably wants it...
+puts `cat #{filename}.#{threshold}.fscore`
+
