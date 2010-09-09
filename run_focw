@@ -4,7 +4,10 @@
 # Usage: ./run_focw <path/to/target/corpus>
 
 input = ARGV.shift
-`./focw #{input} > #{input}.focw`
-`ruby scripts/apply_wordmap.rb #{input} | ruby scripts/evaluate.rb > #{input}.fscore`
-puts `cat #{input}.fscore`
-
+threshold = ARGV.empty? ? "0.0" : ARGV.shift
+`./focw #{input} #{threshold}> #{input}.focw`
+threshold.gsub(".","_")
+`ruby scripts/apply_wordmap.rb #{input} | ruby scripts/evaluate.rb > #{input}.#{threshold}.fscore`
+`mv #{input}.focw #{input}.#{threshold}.focw`
+puts `cat #{input}.#{threshold}.fscore`
+`mv temp.yaml #{input}.#{threshold}.yaml`
