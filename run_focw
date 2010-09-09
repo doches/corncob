@@ -24,7 +24,7 @@ require 'fileutils'
 # Read input
 input = ARGV.shift
 subset = ARGV.empty? ? false : ARGV.shift
-threshold = ARGV.empty? ? "0.0" : ARGV.shift
+threshold = ARGV.empty? ? "0.3" : ARGV.shift
 data_dir = ARGV.empty? ? "corpora" : ARGV.shift
 
 # Ensure that directories and tools exist
@@ -56,7 +56,7 @@ if subset
 else
 	subset = "all"
 	filename = "#{data_dir}/#{input}.#{subset}"
-	`ln -s data/#{input}.target_corpus #{data_dir}/#{input}.#{subset}` if not File.exists?("#{data_dir}/#{input}.#{subset}")
+	`ln -s ../data/#{input}.target_corpus #{data_dir}/#{input}.#{subset}` if not File.exists?("#{data_dir}/#{input}.#{subset}")
 end
 
 # Don't overwrite existing runs without confirmation...
