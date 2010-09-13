@@ -115,7 +115,6 @@ void OCW_dump(OCW *model)
     sprintf(wordmap_f,"%s.wordmap",model->corpus_filename);
     WordMap_dump(model->corpus->wordmap, wordmap_f);
     
-    // TODO: print assignments
     for (int i=0; i<model->num_targets; i++) {
         int index = hash_reverse_lookup(model->wordmap_to_target, i)->key;
         printf("%d\t%d\n",index,unsigned_array_get(model->assignments, i));
