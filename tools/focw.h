@@ -17,12 +17,13 @@
 
 typedef struct OCW_t
 {
-		// threshold for updating category assignments
-		double threshold;
+    // threshold for updating category assignments
+    double threshold;
 
-		// The target corpus to use for training/testing
+    // The target corpus to use for training/testing
     target_corpus *corpus;
     char *corpus_filename;
+    unsigned int document_index;
     
     // Store target-word co-occurrence matrix in an array of arrays.
     ct_hash **targets;
@@ -40,7 +41,8 @@ typedef struct OCW_t
 OCW *OCW_new(char *filename,double threshold);
 void OCW_train(OCW *model);
 void OCW_free(OCW *model);
-void OCW_dump(OCW *model);
+void OCW_save_wordmap(OCW *model);
+void OCW_save_categorization(OCW *model);
 
 #endif
 

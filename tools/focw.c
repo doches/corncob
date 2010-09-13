@@ -17,10 +17,10 @@ int main(int argc, char **argv)
 		return 1;
 	}
     
-  OCW *model = OCW_new(argv[1],atof(argv[2]));
-  OCW_train(model);
-  OCW_dump(model);
-  OCW_free(model);
+    OCW *model = OCW_new(argv[1],atof(argv[2]));
+    OCW_save_wordmap(model);
+    OCW_train(model);
+    OCW_free(model);
     
 	return 0;
 }
@@ -32,6 +32,7 @@ OCW *OCW_new(char *filename,double threshold)
     model->threshold = threshold;
     model->corpus = target_corpus_new(filename);
     model->corpus_filename = filename;
+    model->document_index = 0;
     model->num_targets = 0;
     model->max_targets = 512;
     model->num_categories = 0;
@@ -98,6 +99,9 @@ void OCW_each_document(unsigned int target, unsigned int *words, unsigned int le
         unsigned_array_set(static_ocw_model->assignments, index, unsigned_array_get(static_ocw_model->assignments, best_index));
     }
     
+    if (static_ocw_model->document_index++ % 10000 == 0 && static_ocw_model->document_index != 0) {
+        OCW_save_categorization(static_ocw_model);
+    }
     progressbar_inc(static_progress);
 }
 
@@ -110,17 +114,29 @@ void OCW_train(OCW *model)
     static_ocw_model = NULL;
 }
 
-void OCW_dump(OCW *model)
+void OCW_save_wordmap(OCW *model)
 {
     char *wordmap_f = (char *)malloc(strlen(model->corpus_filename)+9);
     sprintf(wordmap_f,"%s.wordmap",model->corpus_filename);
     WordMap_dump(model->corpus->wordmap, wordmap_f);
     
-    for (int i=0; i<model->num_targets; i++) {
-        int index = hash_reverse_lookup(model->wordmap_to_target, i)->key;
-        printf("%d\t%d\n",index,unsigned_array_get(model->assignments, i));
-    }
-    
     free(wordmap_f);
 }
 
+void OCW_save_categorization(OCW *model)
+{
+    char *save_f = (char *)malloc(sizeof(char)*(strlen(model->corpus_filename)+6));
+    char *threshold_f = (char *)malloc(sizeof(char)*6);
+    sprintf(threshold_f,"%.2f",model->threshold);
+    threshold_f[1] = '_';
+    sprintf(save_f,"%s.%dk.%s.focw",model->corpus_filename,model->document_index/1000,threshold_f);
+    FILE *fout = fopen(save_f,"w");
+    for (int i=0; i<model->num_targets; i++) {
+        int index = hash_reverse_lookup(model->wordmap_to_target, i)->key;
+        fprintf(fout,"%d\t%d\n",index,unsigned_array_get(model->assignments, i));
+    }
+    fclose(fout);
+    
+    free(save_f);
+    free(threshold_f);
+}
