@@ -11,24 +11,25 @@
 
 int main(int argc, char **argv)
 {
-	if(argc != 2) {
-		printf("focw expects 1 argument, recieved %d\n",argc-1);
-		printf("\nUsage: focw <corpus>\n");
+	if(argc != 3) {
+		printf("focw expects 2 argument, recieved %d\n",argc-1);
+		printf("\nUsage: focw <corpus> <threshold>\n");
 		return 1;
 	}
     
-    OCW *model = OCW_new(argv[1]);
-    OCW_train(model);
-    OCW_dump(model);
-    OCW_free(model);
+  OCW *model = OCW_new(argv[1],atof(argv[2]));
+  OCW_train(model);
+  OCW_dump(model);
+  OCW_free(model);
     
 	return 0;
 }
 
 
-OCW *OCW_new(char *filename)
+OCW *OCW_new(char *filename,double threshold)
 {
     OCW *model = (OCW *)malloc(sizeof(OCW));
+    model->threshold = threshold;
     model->corpus = target_corpus_new(filename);
     model->corpus_filename = filename;
     model->num_targets = 0;
@@ -93,7 +94,7 @@ void OCW_each_document(unsigned int target, unsigned int *words, unsigned int le
             }
         }
     }
-    if (best_index != index) {
+    if (best_index != index && best_distance >= static_ocw_model->threshold) {
         unsigned_array_set(static_ocw_model->assignments, index, unsigned_array_get(static_ocw_model->assignments, best_index));
     }
     

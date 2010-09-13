@@ -17,6 +17,10 @@
 
 typedef struct OCW_t
 {
+		// threshold for updating category assignments
+		double threshold;
+
+		// The target corpus to use for training/testing
     target_corpus *corpus;
     char *corpus_filename;
     
@@ -33,7 +37,7 @@ typedef struct OCW_t
     ct_hash *wordmap_to_target;
 } OCW;
 
-OCW *OCW_new(char *filename);
+OCW *OCW_new(char *filename,double threshold);
 void OCW_train(OCW *model);
 void OCW_free(OCW *model);
 void OCW_dump(OCW *model);
