@@ -30,8 +30,9 @@ void test_double_matrix()
     for (int i=0; i<8; i++) {
         double_matrix_set(matrix, 0, i, i+1);
     }
-    printf("\n");
-    double_matrix_print(matrix);
+    for (int i=0; i<8; i++) {
+        assert(i+1 == double_matrix_get_zero(matrix, 0, i));
+    }
     
     double_matrix_free(matrix);
 }

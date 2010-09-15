@@ -62,6 +62,15 @@ void test_hash()
 	count = 0;
 	hash_foreach(map, &print_pair);
 	assert(count == 21);
+    
+    // Test dot
+    ct_hash *hash_a = hash_new(10);
+    hash_add(hash_a, 0, 1);
+    hash_add(hash_a, 1, 2);
+    ct_hash *hash_b = hash_new(10);
+    hash_add(hash_b, 1, 1);
+    hash_add(hash_b, 2, 5);
+    assert(hash_dot(hash_a, hash_b) == 2);
 	
 	hash_free(map);
 }
