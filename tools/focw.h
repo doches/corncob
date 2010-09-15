@@ -19,6 +19,8 @@ typedef struct OCW_t
 {
     // threshold for updating category assignments
     double threshold;
+    // Output current categorization per Nth document
+    unsigned int output_every_index;
 
     // The target corpus to use for training/testing
     target_corpus *corpus;
@@ -33,12 +35,14 @@ typedef struct OCW_t
     // Category assigments
     unsigned_array *assignments;
     unsigned int num_categories;
+    // Previous best distances
+    double distances[550][550];
     
     // Map WordMap values -> target indices
     ct_hash *wordmap_to_target;
 } OCW;
 
-OCW *OCW_new(char *filename,double threshold);
+OCW *OCW_new(char *filename, double threshold, int interval);
 void OCW_train(OCW *model);
 void OCW_free(OCW *model);
 void OCW_save_wordmap(OCW *model);
