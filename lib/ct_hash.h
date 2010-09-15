@@ -41,5 +41,9 @@ hash_element *hash_update(ct_hash *map, int key, int change);
 hash_element *hash_reverse_lookup(ct_hash *map, int value);
 double hash_cosine(ct_hash *a, ct_hash *b);
 
+double hash_dot(ct_hash *a, ct_hash *b);
+double hash_magnitude(ct_hash *a);
+double hash_cosine(ct_hash *a, ct_hash *b);
+
 #endif
 
