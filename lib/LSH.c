@@ -139,3 +139,4 @@ unsigned int LSH_distance(unsigned int x, unsigned int y)
     
     return dist;
 }
+

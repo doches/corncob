@@ -6,7 +6,7 @@ DEBUG_FLAGS =
 
 UNAME := $(shell uname)
 ifeq ($(UNAME),Linux)
-CFLAGS = -std=gnu99 -Wall -I lib/ -I vendor/include/ -I tools/ -Werror -Wno-unused-result $(DEBUG_FLAGS) $(OPTIMIZATION_FLAGS)
+CFLAGS = -std=gnu99 -Wall -I lib/ -I vendor/include/ -I tools/ -Werror $(DEBUG_FLAGS) $(OPTIMIZATION_FLAGS)
 endif
 ifeq ($(UNAME),Darwin)
 CFLAGS = -std=gnu99 -Wall -I lib/ -I vendor/include/ -I tools/ -Werror $(DEBUG_FLAGS) $(OPTIMIZATION_FLAGS)

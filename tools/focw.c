@@ -34,14 +34,14 @@ OCW *OCW_new(char *filename,double threshold)
     model->corpus_filename = filename;
     model->document_index = 0;
     model->num_targets = 0;
-    model->max_targets = 512;
+    model->max_targets = 600;
     model->num_categories = 0;
-    model->assignments = unsigned_array_new(512);
+    model->assignments = unsigned_array_new(600);
     model->targets = (ct_hash **)malloc(sizeof(ct_hash *)*model->max_targets);
     for (int i=0; i<model->max_targets; i++) {
         model->targets[i] = NULL;
     }
-    model->wordmap_to_target = hash_new(512);
+    model->wordmap_to_target = hash_new(600);
     
     return model;
 }
@@ -99,16 +99,18 @@ void OCW_each_document(unsigned int target, unsigned int *words, unsigned int le
         unsigned_array_set(static_ocw_model->assignments, index, unsigned_array_get(static_ocw_model->assignments, best_index));
     }
     
-    if (static_ocw_model->document_index++ % 10000 == 0 && static_ocw_model->document_index != 0) {
-        OCW_save_categorization(static_ocw_model);
+    if (static_ocw_model->document_index++ % 10000 == 0 && static_ocw_model->document_index != 1) {
+        progressbar_finish(static_progress);
+        static_progress = progressbar_new("Training",10000);
     }
+    OCW_save_categorization(static_ocw_model);
     progressbar_inc(static_progress);
 }
 
 void OCW_train(OCW *model)
 {
     static_ocw_model = model;
-    static_progress = progressbar_new("Training", model->corpus->document_count);
+    static_progress = progressbar_new("Training", 10000);
     target_corpus_each_document(model->corpus, &OCW_each_document);
     progressbar_finish(static_progress);
     static_ocw_model = NULL;
@@ -125,18 +127,16 @@ void OCW_save_wordmap(OCW *model)
 
 void OCW_save_categorization(OCW *model)
 {
-    char *save_f = (char *)malloc(sizeof(char)*(strlen(model->corpus_filename)+6));
-    char *threshold_f = (char *)malloc(sizeof(char)*6);
+		char save_f[40];
+		char threshold_f[10];
     sprintf(threshold_f,"%.2f",model->threshold);
     threshold_f[1] = '_';
-    sprintf(save_f,"%s.%dk.%s.focw",model->corpus_filename,model->document_index/1000,threshold_f);
+    sprintf(save_f,"%s.%d.%s.focw",model->corpus_filename,model->document_index,threshold_f);
+    printf("Saving partial categorization %s\n",save_f);
     FILE *fout = fopen(save_f,"w");
     for (int i=0; i<model->num_targets; i++) {
         int index = hash_reverse_lookup(model->wordmap_to_target, i)->key;
         fprintf(fout,"%d\t%d\n",index,unsigned_array_get(model->assignments, i));
     }
     fclose(fout);
-    
-    free(save_f);
-    free(threshold_f);
 }

@@ -167,3 +167,4 @@ double hash_cosine(ct_hash *a, ct_hash *b)
     }
     return hash_dot(a,b) / (hash_magnitude(a) * hash_magnitude(b));
 }
+
