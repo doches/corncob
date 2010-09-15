@@ -31,7 +31,7 @@ test: ${TEST_OBJ} ${LIB_OBJ} ${TEST}
 test.o: test/test.c test/test.h
 	$(CC) -c $(CFLAGS) test/test.c
 
-double_matrix_test.o: double_matrix.o test/double_matrix_test.h test/double_matrix_test.h
+double_matrix_test.o: double_matrix.o test/double_matrix_test.h test/double_matrix_test.c
 	$(CC) -c $(CFLAGS) test/double_matrix_test.c
 
 double_matrix.o: lib/double_matrix.h lib/double_matrix.c
