@@ -6,7 +6,7 @@ DEBUG_FLAGS =
 
 UNAME := $(shell uname)
 ifeq ($(UNAME),Linux)
-CFLAGS = -std=gnu99 -Wall -I lib/ -I vendor/include/ -I tools/ -Werror -Wno-unused-result $(DEBUG_FLAGS) $(OPTIMIZATION_FLAGS)
+CFLAGS = -std=gnu99 -Wall -I lib/ -I vendor/include/ -I tools/ -Werror $(DEBUG_FLAGS) $(OPTIMIZATION_FLAGS)
 endif
 ifeq ($(UNAME),Darwin)
 CFLAGS = -std=gnu99 -Wall -I lib/ -I vendor/include/ -I tools/ -Werror $(DEBUG_FLAGS) $(OPTIMIZATION_FLAGS)
@@ -154,8 +154,9 @@ cosine.o: lib/cosine.c lib/cosine.h
 	$(CC) -c $(CFLAGS) lib/cosine.c
 	
 # FoCW target
-focw: focw.o LSH.o target_corpus.o WordMap.o progressbar.o statusbar.o unsigned_array.o word_hash.o ct_hash.o
-	$(CC) $(LFLAGS) -lgsl target_corpus.o WordMap.o progressbar.o statusbar.o focw.o unsigned_array.o word_hash.o LSH.o ct_hash.o -o focw
+FOCW_DEP = target_corpus.o WordMap.o progressbar.o statusbar.o focw.o unsigned_array.o word_hash.o LSH.o ct_hash.o
+focw: $(FOCW_DEP)
+	$(CC) $(LFLAGS) -lgsl $(FOCW_DEP) -o focw
 
 focw.o: tools/focw.h tools/focw.c
 	$(CC) $(CFLAGS) -c tools/focw.c
