@@ -113,13 +113,14 @@ void OCW_each_document(unsigned int target, unsigned int *words, unsigned int le
         unsigned_array_set(static_ocw_model->assignments, index, unsigned_array_get(static_ocw_model->assignments, best_index));
     }
     
-    if (static_ocw_model->document_index++ % static_ocw_model->output_every_index == 0 && static_ocw_model->document_index != 1) {
+    if (static_ocw_model->document_index % static_ocw_model->output_every_index == 0 && static_ocw_model->document_index != 0) {
         progressbar_finish(static_progress);
         OCW_save_categorization(static_ocw_model);
         static_progress = progressbar_new("Training", static_ocw_model->output_every_index);
     } else {
         progressbar_inc(static_progress);
     }
+    static_ocw_model->document_index++;
 }
 
 void OCW_train(OCW *model)
@@ -142,8 +143,8 @@ void OCW_save_wordmap(OCW *model)
 
 void OCW_save_categorization(OCW *model)
 {
-		char save_f[40];
-		char threshold_f[10];
+    char save_f[40];
+    char threshold_f[10];
     sprintf(threshold_f,"%.2f",model->threshold);
     threshold_f[1] = '_';
     sprintf(save_f,"%s.%d.%s.focw",model->corpus_filename,model->document_index,threshold_f);
