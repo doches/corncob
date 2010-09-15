@@ -159,10 +159,10 @@ focw: $(FOCW_DEP)
 	$(CC) $(LFLAGS) -lgsl $(FOCW_DEP) -o focw
 
 focw.o: tools/focw.h tools/focw.c
-	$(CC) $(CFLAGS) -c tools/focw.c
+	$(CC) -c $(CFLAGS) tools/focw.c
 
 LSH.o: lib/LSH.h lib/LSH.c
-	$(CC) $(CFLAGS) -c lib/LSH.c
+	$(CC) -c $(CFLAGS) lib/LSH.c
 
 .PHONY: clean doc all
 
