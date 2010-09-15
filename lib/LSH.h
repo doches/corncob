@@ -9,3 +9,4 @@ void LSH_generator(unsigned int k);
 void LSH_generator_initialize(unsigned int k);
 void LSH_setup();
 void LSH_teardown();
+

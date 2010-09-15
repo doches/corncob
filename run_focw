@@ -39,7 +39,7 @@ end
 
 # Make subset corpus
 filename = nil
-if subset
+if subset and subset != "all"
 	lines = subset
 	name = subset
 	# User requested a subset corpus be constructed
@@ -69,7 +69,7 @@ if File.exists?("#{filename}.#{threshold.gsub('.','_')}.focw")
 end
 
 # Ok, everything's all set up -- let's do the run
-`./focw #{filename} #{threshold} > #{filename}.focw`
+`nice ./focw #{filename} #{threshold} > #{filename}.focw`
 
 # Score the output and store it in #{data_dir}
 threshold = threshold.gsub(".","_")

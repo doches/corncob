@@ -17,3 +17,4 @@ double magnitude_ua(unsigned_array *a);
 double dot_ua(unsigned_array *a, unsigned_array *b);
 
 unsigned int manhattan(unsigned_array *a, unsigned_array *b);
+
