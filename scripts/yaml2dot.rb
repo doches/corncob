@@ -22,6 +22,7 @@ end
 fout = File.open(output,"w")
 fout.puts "digraph Clustering {"
 fout.puts "\tlabel=\"#{fscore}\""
+fout.puts "\tsize=\"12,12\""
 clusters.each_pair do |cluster,list|
 	list.each do |word|
 		color = colors[word] || "white"
