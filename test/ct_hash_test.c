@@ -71,7 +71,9 @@ void test_hash()
     hash_add(hash_b, 1, 1);
     hash_add(hash_b, 2, 5);
     assert(hash_dot(hash_a, hash_b) == 2);
-	
+    hash_free(hash_a);
+    hash_free(hash_b);
+    
 	hash_free(map);
 }
 

@@ -67,7 +67,10 @@ line_corpus *line_corpus_new(char *filename)
 
     statusbar *progress = statusbar_new("Reading corpus");
 	while(!feof(fin)) {
-		fgets(line, READLINE_LENGTH, fin);
+		char *ret = fgets(line, READLINE_LENGTH, fin);
+		if (ret == NULL) {
+			break;
+		}
 		
 		line_corpus_document *doc = line_corpus_document_new(line,new->wordmap);
 		if(new->documents == NULL) {

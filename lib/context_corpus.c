@@ -66,8 +66,8 @@ context_corpus *context_corpus_new(char *filename)
 	char *delim = " ";
 	unsigned long max = 0;
 	while(!feof(fin)) {
-		fgets(line, READLINE_LENGTH, fin);
-		if(strlen(line) <= 1) {
+		char *ret = fgets(line, READLINE_LENGTH, fin);
+		if(strlen(line) <= 1 || ret == NULL) {
 			break;
 		}
 		if(count <= 0) {

@@ -73,7 +73,10 @@ void document_each_word(const char *path, void (*word_callback)(char *))
 	char line[80];
 
 	while (!feof(doc)) {
-		fgets(line, 80, doc);
+		char *ret = fgets(line, 80, doc);
+		if (ret == NULL) {
+			break;
+		}
 		int length = strlen(line);
 		if (line[length-1] == '\n') {
 			line[length-1] = '\0';
