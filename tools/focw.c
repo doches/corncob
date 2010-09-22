@@ -8,6 +8,9 @@
  */
 
 #include "focw.h"
+#include <stdlib.h>
+#include <time.h>
+#include <assert.h>
 
 int main(int argc, char **argv)
 {
@@ -22,6 +25,7 @@ int main(int argc, char **argv)
         interval = atoi(argv[3]);
     }
     
+    srand(time(NULL));
     OCW *model = OCW_new(argv[1],atof(argv[2]),interval);
     OCW_save_wordmap(model);
     OCW_train(model);
@@ -100,7 +104,11 @@ void OCW_each_document(unsigned int target, unsigned int *words, unsigned int le
         if (i != index) { // Don't compute distance between target and itself
             double distance = hash_cosine(static_ocw_model->targets[index],static_ocw_model->targets[i]);
             if (distance > static_ocw_model->threshold && distance > static_ocw_model->distances[i][index]) {
-                unsigned_array_set(static_ocw_model->assignments, i, unsigned_array_get(static_ocw_model->assignments, index));
+                if(rand() % 100 > 50) {
+	                unsigned_array_set(static_ocw_model->assignments, i, unsigned_array_get(static_ocw_model->assignments, index));
+	              } else {
+	                unsigned_array_set(static_ocw_model->assignments, index, unsigned_array_get(static_ocw_model->assignments, i));
+	              }
                 num_reassignments++;
             }
             static_ocw_model->distances[index][i] = distance;
