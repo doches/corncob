@@ -1,7 +1,7 @@
 # Do genetic algorithms exploration of parameter space for nlda2
 
 class Instance
-	MaxWindow = 5
+	MaxWindow = 10
 	attr_accessor :alpha, :beta, :gamma, :window, :score
 	attr_reader :elapsed
 	
@@ -55,7 +55,9 @@ class Instance
 		cmd = "./nlda2 #{@alpha} #{@beta} #{@gamma} #{@@input} #{self.outfile} #{@window}"
 		`#{cmd}`
 		@elapsed = Time.now - start
-		return `ruby scripts/nlda2_eval.rb #{self.outfile}`.to_f 
+		s = `ruby scripts/nlda2_eval.rb #{self.outfile}`.to_f 
+		puts "[#{@alpha} #{@beta} #{@gamma} #{@window}]:\t#{s}"
+		return s
 	end
 	
 	def to_s
@@ -70,8 +72,8 @@ class Instance
 	end
 	
 	def Instance.random
-		alpha = rand*10
-		beta = rand*0.8+0.2
+		alpha = rand*30
+		beta = rand*0.5+0.5
 		gamma = rand
 		window = (rand*MaxWindow).to_i
 		

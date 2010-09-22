@@ -27,6 +27,7 @@ double nLDA_P_w_c_new(nLDA *model, Instance *instance);
 double nLDA_P_c(nLDA *model,unsigned int c);
 double nLDA_P_w_c(nLDA *model, Instance *instance, unsigned int c);
 void nLDA_dump(nLDA *model, char *filename);
+void nLDA_save_representations(nLDA *model, char *filename);
 void nLDA_reassess(nLDA *model);
 
 #endif

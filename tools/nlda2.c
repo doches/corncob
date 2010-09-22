@@ -21,6 +21,9 @@ int main(int argc, char **argv)
 	nLDA *model = nLDA_new(alpha,beta,gamma,argv[4]);
 	nLDA_train(model);
 	nLDA_dump(model,argv[5]);
+    char rep_filename[80];
+    sprintf(rep_filename,"%s.reps",argv[5]);
+    nLDA_save_representations(model, rep_filename);
 	nLDA_free(model);
 	return 0;
 }
@@ -61,6 +64,23 @@ void nLDA_train_each_document(unsigned int *words, unsigned int length)
 	}
 	static_model->document_index++;
 	progressbar_inc(progress);
+}
+
+void nLDA_save_representations(nLDA *model, char *filename)
+{
+    Instance *instance = Instance_new(0,0,0,0,NULL);
+	FILE *fout = fopen(filename,"w");
+	for(int w=0;w<model->corpus->wordmap->size;w++) {
+        fprintf(fout,"%d",w);
+		instance->w_i = w;
+		for(int i=0;i<model->categories;i++) {
+			double temp_p = nLDA_P_w_c(model,instance,i);
+			fprintf(fout," %f",temp_p);
+		}
+        fprintf(fout,"\n");
+	}
+    
+    fclose(fout);
 }
 
 void nLDA_dump(nLDA *model, char *filename)
@@ -153,9 +173,11 @@ void nLDA_assign_category(nLDA *model, Instance *instance)
 			instance->z_i = i;
 			SparseCounts_add(count_list_get(model->nwcs,instance->z_i),instance->w_i,1);
 			SparseCounts_add(count_list_get(model->ncds,instance->d_i),instance->z_i,1);
+            
 			return;
 		}
 	}
+    // If we got here, we should create a new category...
 	instance->z_i = nLDA_new_category(model);
 	SparseCounts_add(count_list_get(model->nwcs,instance->z_i),instance->w_i,1);
 	SparseCounts_add(count_list_get(model->ncds,instance->d_i),instance->z_i,1);

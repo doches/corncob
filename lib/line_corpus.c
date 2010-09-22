@@ -47,7 +47,7 @@ void line_corpus_document_free(line_corpus_document *doc)
 {
 	if(doc != NULL) {
 		line_corpus_document_free(doc->next);
-		free(doc->words);
+//		free(doc->words);
 		free(doc);
 	}
 }
