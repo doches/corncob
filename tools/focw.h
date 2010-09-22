@@ -47,6 +47,7 @@ void OCW_train(OCW *model);
 void OCW_free(OCW *model);
 void OCW_save_wordmap(OCW *model);
 void OCW_save_categorization(OCW *model);
+void OCW_save_representations(OCW *model);
 
 #endif
 

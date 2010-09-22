@@ -25,6 +25,8 @@ int main(int argc, char **argv)
     OCW *model = OCW_new(argv[1],atof(argv[2]),interval);
     OCW_save_wordmap(model);
     OCW_train(model);
+    OCW_save_representations(model);
+    OCW_save_categorization(model);
     OCW_free(model);
     
 	return 0;
@@ -87,7 +89,7 @@ void OCW_each_document(unsigned int target, unsigned int *words, unsigned int le
     
     // Update the representation for the target
     for (int i=0; i<length; i++) {
-        hash_add(static_ocw_model->targets[index], words[i], 1);
+        hash_update(static_ocw_model->targets[index], words[i], 1);
     }
     
     // Update category assignment for target
@@ -116,6 +118,7 @@ void OCW_each_document(unsigned int target, unsigned int *words, unsigned int le
     if (static_ocw_model->document_index % static_ocw_model->output_every_index == 0 && static_ocw_model->document_index != 0) {
         progressbar_finish(static_progress);
         OCW_save_categorization(static_ocw_model);
+        OCW_save_representations(static_ocw_model);
         static_progress = progressbar_new("Training", static_ocw_model->output_every_index);
     } else {
         progressbar_inc(static_progress);
@@ -143,7 +146,7 @@ void OCW_save_wordmap(OCW *model)
 
 void OCW_save_categorization(OCW *model)
 {
-    char save_f[40];
+    char save_f[60];
     char threshold_f[10];
     sprintf(threshold_f,"%.2f",model->threshold);
     threshold_f[1] = '_';
@@ -155,4 +158,29 @@ void OCW_save_categorization(OCW *model)
         fprintf(fout,"%d\t%d\n",index,unsigned_array_get(model->assignments, i));
     }
     fclose(fout);
+}
+
+FILE *static_save_file;
+void OCW_save_representation(hash_element *element)
+{
+	fprintf(static_save_file,"%d %d ",element->key,element->value);
+}
+
+void OCW_save_representations(OCW *model)
+{
+  char save_f[60];
+  char threshold_f[10];
+  sprintf(threshold_f,"%.2f",model->threshold);
+  threshold_f[1] = '_';
+  sprintf(save_f,"%s.%d.%s.reps",model->corpus_filename,model->document_index,threshold_f);
+	static_save_file = fopen(save_f,"w");
+	for(int i=0;i<model->max_targets;i++) {
+		if(model->targets[i] != NULL) {
+			hash_element *element = hash_reverse_lookup(model->wordmap_to_target,i);
+			fprintf(static_save_file,"%d ",element->key);
+			hash_foreach(model->targets[i],&OCW_save_representation);
+			fprintf(static_save_file,"\n");
+		}
+	}
+	fclose(static_save_file);
 }
