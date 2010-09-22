@@ -25,6 +25,7 @@ fout.puts "\tlabel=\"#{fscore}\""
 fout.puts "\tsize=\"12,12\""
 clusters.each_pair do |cluster,list|
 	list.each do |word|
+		word.gsub!(/^\-/,"")
 		color = colors[word] || "white"
 		fout.puts "\t#{word} [shape=box,style=filled,color=\"#{color}\"];"
 		fout.puts "\t#{word} -> #{cluster} [arrowhead=none];"

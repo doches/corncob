@@ -5,11 +5,13 @@
 
 input = ARGV.shift
 output = ARGV.shift
+pattern = ARGV.empty? ? false : /#{ARGV.shift}/
 Dir.foreach(input) do |file|
 	if file =~ /^(.*)\.yaml$/
-		if not File.exists?("#{output}/#{$1}.png")
+		key = $1
+		if not File.exists?("#{output}/#{key}.png") and pattern and file =~ pattern
 			STDERR.puts file
-			`ruby scripts/yaml2dot.rb #{input}/#{file} && neato -Tpng #{input}/#{$1}.dot -o #{output}/#{$1}.png`
+			`ruby scripts/yaml2dot.rb #{input}/#{file} && neato -Tpng #{input}/#{key}.dot -o #{output}/#{key}.png`
 		end
 	end
 end

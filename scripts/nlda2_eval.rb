@@ -10,7 +10,17 @@ assignments = IO.readlines(results).map { |x| x.strip.split(" ").map { |y| y.to_
 
 targets = IO.readlines(fake ? "scripts/fake.target_words" : "scripts/target_words").map { |x| x.strip }
 
-wordmap = IO.readlines("#{results}.wordmap").map { |x| x.strip.split(" ") }
+wordmap = IO.readlines("#{results}.wordmap")
+wordmap.each_with_index do |x,i|
+	begin
+		wordmap[i] = x.strip.split(" ")
+	rescue ArgumentError
+#		STDERR.puts $!
+#		STDERR.puts "\t[#{x.strip}]"
+	end
+end
+
+#wordmap = IO.readlines("#{results}.wordmap").map { |x| x.strip.split(" ") }
 wordmap_t = wordmap.map { |x| [x[0].to_i,x[1]] }.reject { |x| not targets.include?(x[1]) }
 wordmap = {}
 wordmap_t.each { |x| wordmap[x[0]] = x[1] }
