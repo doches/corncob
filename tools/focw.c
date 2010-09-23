@@ -29,7 +29,7 @@ int main(int argc, char **argv)
     OCW *model = OCW_new(argv[1],atof(argv[2]),interval);
     OCW_save_wordmap(model);
     OCW_train(model);
-    OCW_save_representations(model);
+//    OCW_save_representations(model);
     OCW_save_categorization(model);
     OCW_free(model);
     
@@ -150,7 +150,7 @@ void OCW_each_document(unsigned int target, unsigned int *words, unsigned int le
     if (static_ocw_model->document_index % static_ocw_model->output_every_index == 0 && static_ocw_model->document_index != 0) {
         progressbar_finish(static_progress);
         OCW_save_categorization(static_ocw_model);
-        OCW_save_representations(static_ocw_model);
+//        OCW_save_representations(static_ocw_model);
         static_progress = progressbar_new("Training", static_ocw_model->output_every_index);
     }
     progressbar_inc(static_progress);

@@ -5,8 +5,11 @@
 
 input = ARGV.shift
 pattern = /#{ARGV.shift}/
-output = ARGV.shift
-output = "#{output}.png" if not output =~ /\.png$/
+output = nil
+if not ARGV.empty?
+	output = ARGV.shift
+	output = "#{output}.png" if not output =~ /\.png$/
+end
 
 scores = {}
 corpus = nil
@@ -32,6 +35,8 @@ Dir.foreach(input) do |file|
 		end
 	end
 end
+
+output = "#{corpus}.#{threshold.to_s.gsub('.','_')}.png" if output.nil?
 
 fout = File.open("plot.plt","w")
 fout.puts <<GNU

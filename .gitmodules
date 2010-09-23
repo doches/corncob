@@ -1,3 +1,0 @@
-[submodule "vendor/progressbar"]
-	path = vendor/progressbar
-	url = git@github.com:doches/progressbar.git
