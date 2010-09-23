@@ -4,9 +4,10 @@
 # <input> defaults to 'corpora/'
 
 input = ARGV.shift || "corpora"
+pattern = ARGV.empty? ? /.*/ : /#{ARGV.shift}/
 
 Dir.foreach("#{input}") do |file|
-	if file =~ /^(.*)\.focw$/
+	if file =~ pattern and file =~ /^(.*)\.focw$/
 		if not File.exists?(File.join("#{input}","#{$1}.fscore"))
 			puts $1
 			puts "Scoring #{$1}:"
