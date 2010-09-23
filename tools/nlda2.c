@@ -186,8 +186,15 @@ void nLDA_assign_category(nLDA *model, Instance *instance)
 double nLDA_P_w_c(nLDA *model, Instance *instance, unsigned int c)
 {
 	SparseCounts *nwc = count_list_get(model->nwcs,c);
-	double numerator = (SparseCounts_getValue(nwc,instance->w_i) + model->alpha);
-	double denominator = (nwc->total + model->corpus->wordmap->size * model->alpha);	
+	double numerator = (SparseCounts_getValue(nwc,instance->w_i) + model->beta);
+	double denominator = (nwc->total + model->corpus->wordmap->size * model->beta);	
+	return numerator / denominator;
+}
+
+double nLDA_P_w_c_new(nLDA *model, Instance *instance)
+{
+	double numerator = (model->beta);
+	double denominator = (model->corpus->wordmap->size * model->beta);
 	return numerator / denominator;
 }
 
@@ -198,15 +205,8 @@ double nLDA_P_c(nLDA *model, unsigned int category)
 		count_list_add(model->ncds);
 		ncd = count_list_get(model->ncds,category);
 	}
-	double numerator = ((SparseCounts_getValue(ncd,category)+model->gamma)*model->beta);
-	double denominator = ((1.0 - model->beta) + (ncd->total + model->categories*model->gamma) * model->beta);
-	return numerator / denominator;
-}
-
-double nLDA_P_w_c_new(nLDA *model, Instance *instance)
-{
-	double numerator = (model->alpha);
-	double denominator = (model->corpus->wordmap->size * model->alpha);
+	double numerator = ((SparseCounts_getValue(ncd,category)+model->alpha)*model->gamma);
+	double denominator = ncd->total + model->categories*model->alpha + model->gamma;
 	return numerator / denominator;
 }
 
@@ -217,8 +217,8 @@ double nLDA_P_c_new(nLDA *model)
 		count_list_add(model->ncds);
 		ncd = count_list_get(model->ncds,model->document_index);
 	}
-	double numerator = (1.0 - model->beta);
-	double denominator = ((1.0 - model->beta) + (ncd->total + model->categories * model->gamma) * model->beta);
+	double numerator = model->gamma;
+	double denominator = ncd->total + model->categories*model->alpha + model->gamma;
 	return numerator / denominator;
 }
 
