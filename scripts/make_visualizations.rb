@@ -6,6 +6,7 @@
 input = ARGV.shift
 output = ARGV.shift
 pattern = ARGV.empty? ? false : /#{ARGV.shift}/
+`mkdir #{output}` if not File.exists?(output)
 Dir.foreach(input) do |file|
 	if file =~ /^(.*)\.yaml$/
 		key = $1

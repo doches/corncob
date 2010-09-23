@@ -1,0 +1,36 @@
+#!/usr/bin/env ruby
+# Automate the evaluation of a currently-running foCW instance.
+
+require 'optparse'
+
+# Default options
+options = {
+	:threshold => ".*",
+	:corpus => ".*",
+	:graphviz => false,
+	:gnuplot => false,
+	:corpus_dir => "corpora",
+	:graphviz_output_dir => "viz",
+	:graphviz_output_bin => true,
+}
+# Parse command line options
+OptionParser.new do |opts|
+	opts.banner = "Usage: #{__FILE__} [options]"
+	
+	opts.on("-t","--threshold THRESHOLD","Threshold") { |t| options[:threshold] = t }
+	opts.on("-c","--corpus CORPUS","Corpus") { |c| options[:corpus] = c }
+	opts.on("-g","--graphviz","Enable GraphViz visualization") { options[:graphviz] = true }
+	opts.on("-p","--gnuplot","Enable Gnuplot visualization") { options[:gnuplot] = true }
+	opts.on("--corpus-dir DIR","Directory to look for .focw files") { |dir| options[:corpus_dir] = dir }
+	opts.on("--viz-dir DIR","Directory into which to store graphviz output") { |dir| options[:graphviz_output_dir] = dir }
+	opts.on("--no-viz-bin","Don't bin related visualizations into a single folder") { options[:graphviz_output_bin] = false }
+end.parse!
+
+# Run evaluation
+threshold_s = options[:threshold].to_s.gsub(".","_")
+graphviz_output = options[:graphviz_output_dir]
+graphviz_output = File.join(graphviz_output,"#{options[:corpus]}.#{threshold_s}") if options[:graphviz_output_bin]
+pattern = "#{options[:corpus]}.*.#{threshold_s}"
+`ruby scripts/score_new_focw_runs.rb #{options[:corpus_dir]} #{pattern}`
+`ruby scripts/make_visualizations.rb #{options[:corpus_dir]} #{graphviz_output} #{pattern}` if options[:graphviz]
+`ruby scripts/graph_scores.rb #{options[:corpus_dir]} #{pattern}` if options[:gnuplot]

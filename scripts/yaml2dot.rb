@@ -29,6 +29,6 @@ clusters.each_pair do |cluster,list|
 		color = colors[word] || "white"
 		fout.puts "\t#{word} [shape=box,style=filled,color=\"#{color}\"];"
 		fout.puts "\t#{word} -> #{cluster} [arrowhead=none];"
-	end
+	end if list.size > 1
 end
 fout.puts "}"

@@ -21,3 +21,7 @@ data/
 *.target_corpus
 *.sparsefile
 gmon.out
+*.png
+*.dat
+*.plt
+*.pdf

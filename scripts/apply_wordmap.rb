@@ -7,7 +7,7 @@ input = ARGV.shift
 wordmap_file = "#{input}.wordmap"
 wordmap_file_com = input.split(".")
 while not File.exists?(wordmap_file) and wordmap_file.size > 0
-	STDERR.puts "#{wordmap_file} not found"
+#	STDERR.puts "#{wordmap_file} not found"
 	len = wordmap_file.size
 	wordmap_file_com.pop
 	wordmap_file = wordmap_file_com.join(".") + ".wordmap"
