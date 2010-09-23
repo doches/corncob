@@ -15,6 +15,12 @@
 #include "progressbar.h"
 #include "ct_hash.h"
 
+typedef struct Pair_t
+{
+    unsigned int a;
+    unsigned int b;
+} Pair;
+
 typedef struct OCW_t
 {
     // threshold for updating category assignments
@@ -48,6 +54,7 @@ void OCW_free(OCW *model);
 void OCW_save_wordmap(OCW *model);
 void OCW_save_categorization(OCW *model);
 void OCW_save_representations(OCW *model);
+void array_shuffle(Pair *array,unsigned int size);
 
 #endif
 
