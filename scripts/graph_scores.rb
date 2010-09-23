@@ -35,7 +35,7 @@ end
 
 fout = File.open("plot.plt","w")
 fout.puts <<GNU
-set terminal png
+set terminal png font "scripts/Arial.ttf" 14
 set output \"#{output}\"
 set xtics rotate by -45
 set yrange [0:0.5]
@@ -50,4 +50,7 @@ scores.map { |l,s| [l,s] }.sort { |a,b| a[0] <=> b[0] }.each do |lines,score|
 end
 fout.close
 
-`gnuplot plot.plt && gthumb #{output}`
+viewer = 'gthumb'
+viewer = 'open' if `uname`.strip == "Darwin"
+
+`gnuplot plot.plt && #{viewer} #{output}`

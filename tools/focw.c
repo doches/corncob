@@ -119,8 +119,32 @@ void OCW_each_document(unsigned int target, unsigned int *words, unsigned int le
             }
         }
     }
-    if (num_reassignments > 0 && best_index != index && best_distance >= static_ocw_model->threshold) {
+    if (best_index != index && best_distance >= static_ocw_model->threshold) {
         unsigned_array_set(static_ocw_model->assignments, index, unsigned_array_get(static_ocw_model->assignments, best_index));
+    }
+    
+    Pair updates[600];
+    unsigned int num_updates = 0;
+    
+    for (int i=0; i<static_ocw_model->num_targets-1; i++) {
+        int match = i;
+        double match_distance = static_ocw_model->threshold;
+        for (int j=i+1; j<static_ocw_model->num_targets; j++) {
+            double distance = static_ocw_model->distances[i][j];
+            if (distance > match_distance) {
+                match = j;
+                match_distance = distance;
+            }
+        }
+        if (match != i) {
+            updates[num_updates].a = i;
+            updates[num_updates].b = match;
+            num_updates++;
+        }
+    }
+    array_shuffle(updates,num_updates);
+    for (int i=0; i<num_updates; i++) {
+        unsigned_array_set(static_ocw_model->assignments, updates[i].a, unsigned_array_get(static_ocw_model->assignments, updates[i].b));
     }
     
     if (static_ocw_model->document_index % static_ocw_model->output_every_index == 0 && static_ocw_model->document_index != 0) {
@@ -128,9 +152,8 @@ void OCW_each_document(unsigned int target, unsigned int *words, unsigned int le
         OCW_save_categorization(static_ocw_model);
         OCW_save_representations(static_ocw_model);
         static_progress = progressbar_new("Training", static_ocw_model->output_every_index);
-    } else {
-        progressbar_inc(static_progress);
     }
+    progressbar_inc(static_progress);
     static_ocw_model->document_index++;
 }
 
@@ -191,4 +214,22 @@ void OCW_save_representations(OCW *model)
 		}
 	}
 	fclose(static_save_file);
+}
+
+void swap_pair(Pair *a, Pair *b)
+{
+    Pair temp;
+    temp.a = a->a;
+    temp.b = a->b;
+    a->a = b->a;
+    a->b = b->b;
+    b->a = temp.a;
+    b->b = temp.b;
+}
+
+void array_shuffle(Pair *array,unsigned int size)
+{
+    for (int i=0; i<size; i++) {
+        swap_pair(&array[i], &array[rand()%size]);
+    }
 }
