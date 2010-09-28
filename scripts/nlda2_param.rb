@@ -2,6 +2,8 @@
 
 class Instance
 	MaxWindow = 10
+	MaxAlpha = 10
+	MaxBeta = 10
 	attr_accessor :alpha, :beta, :gamma, :window, :score
 	attr_reader :elapsed
 	
@@ -27,12 +29,14 @@ class Instance
 		@alpha += rand * 0.2
 		if @alpha < 0.1
 			@alpha = 0.1+rand*0.2
+		elsif @alpha > MaxAlpha
+			@alpha = MaxAlpha - rand*0.2
 		end
 		@beta += rand * 0.2
 		if @beta < 0.1
 			@beta = 0.1+rand*0.2
-		elsif @beta > 1.0
-			@beta = 1.0 - rand*0.2
+		elsif @beta > MaxBeta
+			@beta = MaxBeta - rand*0.2
 		end
 		@gamma += rand * 0.2
 		if @gamma < 0.0
@@ -72,8 +76,8 @@ class Instance
 	end
 	
 	def Instance.random
-		alpha = rand*30
-		beta = rand*0.5+0.5
+		alpha = rand*MaxAlpha
+		beta = rand*MaxBeta
 		gamma = rand
 		window = (rand*MaxWindow).to_i
 		
@@ -94,7 +98,7 @@ class World
 		
 		Instance.input = input
 		begin
-			report = `head -n 5 #{Instance.input}.results/report`.split("\n").reject { |l| not l =~ /<([^>]+)>/ }.pop
+			report = `head -n 5 #{Instance.input.split('/').pop}.results/report`.split("\n").reject { |l| not l =~ /<([^>]+)>/ }.pop
 			report =~ /<([^>]+)>/
 			params = $1.split(" ").map { |x| x.to_f }
 			@population.clear
