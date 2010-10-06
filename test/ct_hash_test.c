@@ -12,6 +12,7 @@ void test_hash()
 	// Create a hash and populate it
 	ct_hash *map = hash_new(10);
 	assert(map->size == 0);
+    assert(map->sum == 0);
 	
 	hash_element *a;
 	for (int i=0; i<20; i++) {
@@ -63,6 +64,9 @@ void test_hash()
 	hash_foreach(map, &print_pair);
 	assert(count == 21);
     
+    // Clean up
+	hash_free(map);
+    
     // Test dot
     ct_hash *hash_a = hash_new(10);
     hash_add(hash_a, 0, 1);
@@ -74,6 +78,29 @@ void test_hash()
     hash_free(hash_a);
     hash_free(hash_b);
     
-	hash_free(map);
+    // Test sum
+    ct_hash *sum = hash_new(10);
+        // Hash sum should start at zero
+    assert(sum->sum == 0);
+        // If we add a new item, sum should be its value
+    hash_add(sum, 0, 5);
+    assert(sum->sum == 5);
+        // If we update that item, make sure the sum reflects the change
+    hash_update(sum, 0, 3);
+    assert(sum->sum == 8);
+        // How 'bout negative updates?
+    hash_update(sum, 0, -2);
+    assert(sum->sum == 6);
+        // If we add a key that already exists, make sure we subtracted the old value
+    hash_add(sum,0,3);
+    assert(sum->sum == 3);
+        // Multiple values OK?
+    hash_add(sum, 1, 1);
+    assert(sum->sum == 4);
+    hash_update(sum, 1, -1);
+    assert(sum->sum == 3);
+    hash_add(sum, 1, 5);
+    assert(sum->sum == 8);
+    hash_free(sum);
 }
 

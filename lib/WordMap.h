@@ -14,5 +14,6 @@ WordMap *WordMap_new(unsigned int buckets);
 unsigned int WordMap_index(WordMap *map, char *word);
 void WordMap_free(WordMap *map);
 void WordMap_dump(WordMap *map, char *filename);
+char *WordMap_reverse_lookup(WordMap *map, unsigned int index);
 
 #endif

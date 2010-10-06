@@ -6,9 +6,13 @@
 input = ARGV.shift
 pattern = /#{ARGV.shift}/
 output = nil
+#format = "eps"
+#term = "postscript enhanced color"
+format = "png"
+term = "png"
 if not ARGV.empty?
 	output = ARGV.shift
-	output = "#{output}.png" if not output =~ /\.png$/
+	output = "#{output}.#{format}" if not output =~ /\.#{format}$/
 end
 
 scores = {}
@@ -36,20 +40,20 @@ Dir.foreach(input) do |file|
 	end
 end
 
-output = "#{corpus}.#{threshold.to_s.gsub('.','_')}.png" if output.nil?
+output = "#{corpus}.#{threshold.to_s.gsub('.','_')}.#{format}" if output.nil?
+datfile = output.gsub(".#{format}",".dat")
 
 fout = File.open("plot.plt","w")
 fout.puts <<GNU
-set terminal png font "scripts/Arial.ttf" 14
+set terminal #{term} font "scripts/Arial.ttf" 14
 set output \"#{output}\"
 set xtics rotate by -45
-set yrange [0:0.5]
-set xrange [0:#{scores.size}]
-plot 'plot.dat' using 2:xticlabels(1) with linespoints title '#{corpus} #{threshold}'
-GNU
+set yrange [0:1.0]
+set xrange [0:#{scores.size-1}]
+plot '#{datfile}' using 2:xticlabels(1) with linespoints title '#{corpus} #{threshold}'
 fout.close
 
-fout = File.open("plot.dat","w")
+fout = File.open(datfile,"w")
 scores.map { |l,s| [l,s] }.sort { |a,b| a[0] <=> b[0] }.each do |lines,score|
 	fout.puts "#{lines}\t#{score}"
 end

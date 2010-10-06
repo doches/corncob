@@ -63,6 +63,9 @@ WordMap_test.o: WordMap.o test/WordMap_test.c test/WordMap_test.h
 
 line_corpus_test.o: line_corpus.o test/line_corpus_test.h test/line_corpus_test.c statusbar.o
 	$(CC) -c $(CFLAGS) test/line_corpus_test.c
+	
+double_hash_test.o: double_hash.o test/double_hash_test.h test/double_hash_test.c
+	$(CC) -c $(CFLAGS) test/double_hash_test.c
 
 # LDA target
 lda: ct_hash.o word_hash.o corpus.o lda.o Instance.o
@@ -154,7 +157,7 @@ cosine.o: lib/cosine.c lib/cosine.h
 	$(CC) -c $(CFLAGS) lib/cosine.c
 	
 # FoCW target
-FOCW_DEP = target_corpus.o WordMap.o progressbar.o statusbar.o focw.o unsigned_array.o word_hash.o LSH.o ct_hash.o
+FOCW_DEP = target_corpus.o WordMap.o progressbar.o statusbar.o focw.o unsigned_array.o word_hash.o LSH.o ct_hash.o double_hash.o
 focw: $(FOCW_DEP)
 	$(CC) $(LFLAGS) -lgsl $(FOCW_DEP) -o focw
 
@@ -163,6 +166,9 @@ focw.o: tools/focw.h tools/focw.c
 
 LSH.o: lib/LSH.h lib/LSH.c
 	$(CC) -c $(CFLAGS) lib/LSH.c
+	
+double_hash.o: lib/double_hash.h lib/double_hash.c
+	$(CC) -c $(CFLAGS) lib/double_hash.c
 
 .PHONY: clean doc all
 

@@ -17,11 +17,13 @@
 #include "unsigned_array_test.h"
 #include "cosine_test.h"
 #include "double_matrix_test.h"
+#include "double_hash_test.h"
 
 int main (int argc, const char * argv[]) {
 	
 	DO_TEST("corpus",test_corpus);
 	DO_TEST("ct_hash",test_hash);
+    DO_TEST("double_hash",test_double_hash);
 	DO_TEST("SparseCounts",test_SparseCounts);
 	DO_TEST("word_hash",test_word_hash);
 	DO_TEST("WordMap",test_WordMap);

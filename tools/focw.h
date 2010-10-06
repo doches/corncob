@@ -14,6 +14,7 @@
 #include "unsigned_array.h"
 #include "progressbar.h"
 #include "ct_hash.h"
+#include "double_hash.h"
 
 typedef struct Pair_t
 {
@@ -38,6 +39,12 @@ typedef struct OCW_t
     unsigned int num_targets;
     unsigned int max_targets;
     
+    // For calculating PPMI
+        // Count of all words seen in all contexts
+    unsigned int f_xx;
+        // Count of how many times each context word has appeared
+    ct_hash *context_counts;
+    
     // Category assigments
     unsigned_array *assignments;
     unsigned int num_categories;
@@ -55,6 +62,7 @@ void OCW_save_wordmap(OCW *model);
 void OCW_save_categorization(OCW *model);
 void OCW_save_representations(OCW *model);
 void array_shuffle(Pair *array,unsigned int size);
+double_hash *OCW_ppmi(OCW *model,int target_index);
 
 #endif
 
