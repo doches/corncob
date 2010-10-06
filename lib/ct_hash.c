@@ -185,3 +185,14 @@ double hash_cosine(ct_hash *a, ct_hash *b)
     return hash_dot(a,b) / (hash_magnitude(a) * hash_magnitude(b));
 }
 
+void hash_print_helper(hash_element *element)
+{
+    printf("%d (%d), ",element->key,element->value);
+}
+
+void hash_print(ct_hash *hash)
+{
+    printf("ct_hash (%p) <",(void *)hash);
+    hash_foreach(hash, &hash_print_helper);
+    printf(">\n");
+}

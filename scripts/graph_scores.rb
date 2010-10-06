@@ -6,8 +6,10 @@
 input = ARGV.shift
 pattern = /#{ARGV.shift}/
 output = nil
-format = "eps"
-term = "postscript enhanced color"
+#format = "eps"
+#term = "postscript enhanced color"
+format = "png"
+term = "png"
 if not ARGV.empty?
 	output = ARGV.shift
 	output = "#{output}.#{format}" if not output =~ /\.#{format}$/

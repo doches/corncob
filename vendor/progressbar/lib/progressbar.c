@@ -94,7 +94,7 @@ void progressbar_finish(progressbar *bar)
 	fprintf(stderr,"\n");
 	
 	// We've finished with this progressbar, so go ahead and free it.
-	progressbar_free(bar);
+//	progressbar_free(bar);
 	
 	return;
 }

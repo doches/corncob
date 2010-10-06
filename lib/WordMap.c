@@ -20,6 +20,23 @@ unsigned int WordMap_index(WordMap *map, char *word)
 	}
 }
 
+char *static_WordMap_lookup;
+unsigned int static_WordMap_index;
+void WordMap_reverse_helper(word_hash_element *element)
+{
+    if (element->value == static_WordMap_index) {
+        static_WordMap_lookup = element->key;
+    }
+}
+
+char *WordMap_reverse_lookup(WordMap *map, unsigned int index)
+{
+    static_WordMap_index = index;
+    static_WordMap_lookup = NULL;
+    word_hash_foreach(map->map, &WordMap_reverse_helper);
+    return static_WordMap_lookup;
+}
+
 FILE *WordMap_fout;
 
 void WordMap_dump_helper(word_hash_element *word_e)
