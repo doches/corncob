@@ -44,7 +44,7 @@ set terminal png font "scripts/Arial.ttf" 14
 set output \"#{output}\"
 set xtics rotate by -45
 set yrange [0:0.5]
-set xrange [0:#{scores.size+1}]
+set xrange [0:#{scores.size}]
 plot 'plot.dat' using 2:xticlabels(1) with linespoints title '#{corpus} #{threshold}'
 GNU
 fout.close
