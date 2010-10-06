@@ -30,6 +30,7 @@ typedef struct _ct_h_hash {
 	hash_element **buckets;
 	unsigned int num_buckets;
 	unsigned int size;
+    unsigned int sum;
 } ct_hash;
 
 ct_hash *hash_new(unsigned int buckets);

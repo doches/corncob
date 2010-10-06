@@ -11,4 +11,4 @@
 #include <assert.h>
 
 #define DO_TEST(__NAME__,__FUNC__) printf("Testing %s...",__NAME__); __FUNC__(); printf("OK\n");
-
+#define DEBUG 1

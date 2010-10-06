@@ -20,7 +20,7 @@ int main(int argc, char **argv)
 		return 1;
 	}
     
-    int interval = 10000;
+    int interval = -1;
     if (argc >= 4) {
         interval = atoi(argv[3]);
     }
@@ -147,7 +147,7 @@ void OCW_each_document(unsigned int target, unsigned int *words, unsigned int le
         unsigned_array_set(static_ocw_model->assignments, updates[i].a, unsigned_array_get(static_ocw_model->assignments, updates[i].b));
     }
     
-    if (static_ocw_model->document_index % static_ocw_model->output_every_index == 0 && static_ocw_model->document_index != 0) {
+    if (static_ocw_model->output_every_index > 0 && static_ocw_model->document_index % static_ocw_model->output_every_index == 0 && static_ocw_model->document_index != 0) {
         progressbar_finish(static_progress);
         OCW_save_categorization(static_ocw_model);
 //        OCW_save_representations(static_ocw_model);
@@ -181,8 +181,13 @@ void OCW_save_categorization(OCW *model)
     char threshold_f[10];
     sprintf(threshold_f,"%.2f",model->threshold);
     threshold_f[1] = '_';
-    sprintf(save_f,"%s.%d.%s.focw",model->corpus_filename,model->document_index,threshold_f);
-    printf("Saving partial categorization %s\n",save_f);
+    if (model->output_every_index > 0) {
+        sprintf(save_f,"%s.%d.%s.focw",model->corpus_filename,model->document_index,threshold_f);
+        printf("Saving partial categorization %s\n",save_f);
+    } else {
+        sprintf(save_f,"%s.focw",model->corpus_filename);
+        printf("Saving final categorization %s\n",save_f);
+    }
     FILE *fout = fopen(save_f,"w");
     for (int i=0; i<model->num_targets; i++) {
         int index = hash_reverse_lookup(model->wordmap_to_target, i)->key;

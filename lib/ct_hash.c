@@ -10,6 +10,7 @@
 #include "ct_hash.h"
 #include <math.h>
 #include <assert.h>
+#include <stdio.h>
 
 /*********** Hash Element **************/
 
@@ -34,13 +35,14 @@ ct_hash *hash_new(unsigned int buckets)
 		hash->buckets[i] = NULL;
 	}
 	hash->size = 0;
+    hash->sum = 0;
 	return hash;
 }
 
 // Internal hash function
 int ct_h_hash(unsigned int key,int interval)
 {
-    key = (key >> 0) * 2654435761;
+//    key = (key >> 0) * 2654435761;
 	return key % interval;
 }
 
@@ -50,6 +52,8 @@ hash_element *hash_add(ct_hash *map,int key,unsigned int value)
 	unsigned int index = ct_h_hash(key,map->num_buckets);
 	hash_element *chain;
     
+    map->sum += value;
+    
 	if (map->buckets[index] == NULL) {
 		map->buckets[index] = ct_h_element_new(key, value);
 		map->size++;
@@ -58,11 +62,23 @@ hash_element *hash_add(ct_hash *map,int key,unsigned int value)
 		chain = map->buckets[index];
 		while (chain->next != NULL) {
 			if (chain->key == key) {
+#ifdef DEBUG
+                fprintf(stderr,"[warn] Replacing key %d (%d) with %d\n",key,chain->value,value);
+#endif
+                map->sum -= chain->value;
 				chain->value = value;
 				return chain;
 			}
 			chain = chain->next;
 		}
+        if (chain->key == key) {
+#ifdef DEBUG
+            fprintf(stderr,"[warn] Replacing key %d (%d) with %d\n",key,chain->value,value);
+#endif
+            map->sum -= chain->value;
+            chain->value = value;
+            return chain;
+        }
 		chain->next = ct_h_element_new(key, value);
 		map->size++;
 		return chain->next;
@@ -77,6 +93,7 @@ hash_element *hash_update(ct_hash *map, int key, int change)
 		elem = hash_add(map,key,change);
 	} else {
 		elem->value += change;
+        map->sum += change;
 	}
 	return elem;
 }
