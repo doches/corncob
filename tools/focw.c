@@ -276,7 +276,7 @@ void OCW_ppmi_helper(hash_element *element)
     double p_xj = (double)f_xj / f_xx;
     
     double ppmi_ij = log(p_ij/(p_ix * p_xj));
-    double_hash_add(static_ppmi, element->key, (ppmi_ij > 0 ? ppmi_ij : 0));
+    double_hash_add(static_ppmi, element->key, ppmi_ij);
 }
 
 double_hash *OCW_ppmi(OCW *model,int index)
