@@ -51,6 +51,7 @@ set xtics rotate by -45
 set yrange [0:1.0]
 set xrange [0:#{scores.size-1}]
 plot '#{datfile}' using 2:xticlabels(1) with linespoints title '#{corpus} #{threshold}'
+GNU
 fout.close
 
 fout = File.open(datfile,"w")
