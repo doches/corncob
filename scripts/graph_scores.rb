@@ -63,4 +63,4 @@ fout.close
 viewer = 'gthumb'
 viewer = 'open' if `uname`.strip == "Darwin"
 
-`gnuplot plot.plt && #{viewer} #{output}`
+`gnuplot plot.plt && #{viewer} #{output} &`
