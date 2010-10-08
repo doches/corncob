@@ -32,7 +32,6 @@ int main(int argc, char **argv)
     OCW *model = OCW_new(argv[1],atof(argv[2]),interval);
     OCW_save_wordmap(model);
     OCW_train(model);
-//    OCW_save_representations(model);
     OCW_save_categorization(model);
     OCW_free(model);
     
@@ -110,30 +109,17 @@ void OCW_each_document(unsigned int target, unsigned int *words, unsigned int le
     
     // Compute PPMI vector for this target
     double_hash *target_ppmi = OCW_ppmi(static_ocw_model,index);
-#ifdef DEBUG
-    hash_element *revx = hash_reverse_lookup(static_ocw_model->wordmap_to_target, index);
-    double_hash_printx(target_ppmi,WordMap_reverse_lookup(static_ocw_model->corpus->wordmap, revx->key));
-#endif
     
     // Update distance matrix
     for (int i=0; i<static_ocw_model->num_targets; i++) {
         if (i != index) { // Don't compute distance between target and itself
             double_hash *other_ppmi = OCW_ppmi(static_ocw_model, i);
             double distance = double_hash_cosine(target_ppmi,other_ppmi);
-#ifdef DEBUG
-            // DEBUG: print target ppmi vector
-            printf("  ( %.4f )  ",distance);
-            hash_element *rev = hash_reverse_lookup(static_ocw_model->wordmap_to_target, i);
-            double_hash_printx(other_ppmi,WordMap_reverse_lookup(static_ocw_model->corpus->wordmap, rev->key));
-#endif
             double_hash_free(other_ppmi);
             static_ocw_model->distances[index][i] = distance;
             static_ocw_model->distances[i][index] = distance;
         }
     }
-#ifdef DEBUG
-    printf("\n");
-#endif
     
     // Find nearest neighbors that need updating
     Pair updates[600];
