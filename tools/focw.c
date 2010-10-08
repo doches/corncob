@@ -6,8 +6,8 @@
  *  Copyright 2010 Expat Games. All rights reserved.
  *
  */
-
-
+ 
+//#define DEBUG
 
 #include "focw.h"
 #include <stdlib.h>
@@ -109,12 +109,29 @@ void OCW_each_document(unsigned int target, unsigned int *words, unsigned int le
     
     // Compute PPMI vector for this target
     double_hash *target_ppmi = OCW_ppmi(static_ocw_model,index);
+#ifdef DEBUG
+    hash_element *revx = hash_reverse_lookup(static_ocw_model->wordmap_to_target, index);
+    char *elementx_label = WordMap_reverse_lookup(static_ocw_model->corpus->wordmap, revx->key);
+//    double_hash_printx(target_ppmi,elementx_label);
+    hash_printx(static_ocw_model->targets[index],elementx_label);
+#endif
     
     // Update distance matrix
     for (int i=0; i<static_ocw_model->num_targets; i++) {
         if (i != index) { // Don't compute distance between target and itself
             double_hash *other_ppmi = OCW_ppmi(static_ocw_model, i);
             double distance = double_hash_cosine(target_ppmi,other_ppmi);
+#ifdef DEBUG
+            // DEBUG: print target ppmi vector
+            int last_printed = 0;
+            printf("  ( %.4f )  %n",distance,&last_printed);
+            hash_element *rev = hash_reverse_lookup(static_ocw_model->wordmap_to_target, i);
+            char *element_label = WordMap_reverse_lookup(static_ocw_model->corpus->wordmap, rev->key);
+//            double_hash_printx(other_ppmi,element_label);
+//            for(int i=0;i<last_printed;i++) { printf(" "); }
+            ct_hash *intersection = hash_intersection(static_ocw_model->targets[i],static_ocw_model->targets[index]);
+            hash_printx(intersection,element_label);
+#endif
             double_hash_free(other_ppmi);
             static_ocw_model->distances[index][i] = distance;
             static_ocw_model->distances[i][index] = distance;
@@ -138,21 +155,34 @@ void OCW_each_document(unsigned int target, unsigned int *words, unsigned int le
             updates[num_updates].a = i;
             updates[num_updates].b = match;
             num_updates++;
+            updates[num_updates].b = i;
+            updates[num_updates].a = match;
+            num_updates++;
         }
     }
     
-    // Do CW
-    array_shuffle(updates,num_updates);
-    for (int i=0; i<num_updates; i++) {
 #ifdef DEBUG
-        char *a = WordMap_reverse_lookup(static_ocw_model->corpus->wordmap, hash_reverse_lookup(static_ocw_model->wordmap_to_target, updates[i].a)->key);
-        char *b = WordMap_reverse_lookup(static_ocw_model->corpus->wordmap, hash_reverse_lookup(static_ocw_model->wordmap_to_target, updates[i].b)->key);
-        printf("%s (%d) <- %s (%d)\n",a,unsigned_array_get(static_ocw_model->assignments, updates[i].a),b,unsigned_array_get(static_ocw_model->assignments, updates[i].b));
+    printf("\n");
 #endif
-        unsigned_array_set(static_ocw_model->assignments, updates[i].a, unsigned_array_get(static_ocw_model->assignments, updates[i].b));
+    
+    // Do CW
+    if(num_updates > 0) {
+      array_shuffle(updates,num_updates);
+      for (int i=0; i<num_updates; i++) {
+#ifdef DEBUG
+          char *a = WordMap_reverse_lookup(static_ocw_model->corpus->wordmap, hash_reverse_lookup(static_ocw_model->wordmap_to_target, updates[i].a)->key);
+          char *b = WordMap_reverse_lookup(static_ocw_model->corpus->wordmap, hash_reverse_lookup(static_ocw_model->wordmap_to_target, updates[i].b)->key);
+          printf("%s (%d) <- %s (%d)\n",a,unsigned_array_get(static_ocw_model->assignments, updates[i].a),b,unsigned_array_get(static_ocw_model->assignments, updates[i].b));
+#endif
+          unsigned_array_set(static_ocw_model->assignments, updates[i].a, unsigned_array_get(static_ocw_model->assignments, updates[i].b));
+      }
     }
     double_hash_free(target_ppmi);
     
+#ifdef DEBUG
+    printf("\n");
+#endif
+
     if (static_ocw_model->output_every_index > 0 && static_ocw_model->document_index % static_ocw_model->output_every_index == 0 && static_ocw_model->document_index != 0) {
         progressbar_finish(static_progress);
         OCW_save_categorization(static_ocw_model);
@@ -188,10 +218,14 @@ void OCW_save_categorization(OCW *model)
     threshold_f[1] = '_';
     if (model->output_every_index > 0) {
         sprintf(save_f,"%s.%d.%s.focw",model->corpus_filename,model->document_index,threshold_f);
+#ifndef DEBUG        
         printf("Saving partial categorization %s\n",save_f);
+#endif
     } else {
         sprintf(save_f,"%s.focw",model->corpus_filename);
+#ifndef DEBUG
         printf("Saving final categorization %s\n",save_f);
+#endif        
     }
     FILE *fout = fopen(save_f,"w");
     for (int i=0; i<model->num_targets; i++) {

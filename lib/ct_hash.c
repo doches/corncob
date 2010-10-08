@@ -196,3 +196,28 @@ void hash_print(ct_hash *hash)
     hash_foreach(hash, &hash_print_helper);
     printf(">\n");
 }
+
+void hash_printx(ct_hash *hash, char *label)
+{
+    printf("%s <",label);
+    hash_foreach(hash, &hash_print_helper);
+    printf(">\n");
+}
+
+ct_hash *static_hash_intersect_other;
+ct_hash *static_hash_intersection;
+void hash_intersection_helper(hash_element *element)
+{
+  if(hash_get(static_hash_intersect_other,element->key) != NULL) {
+    hash_add(static_hash_intersection,element->key,element->value);
+  }
+}
+
+ct_hash *hash_intersection(ct_hash *a, ct_hash *b)
+{
+  ct_hash *intersect = hash_new(a->size > b->size ? a->size : b->size);
+  static_hash_intersect_other = b;
+  static_hash_intersection = intersect;
+  hash_foreach(a,&hash_intersection_helper);
+  return intersect;
+}
