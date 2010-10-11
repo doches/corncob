@@ -2,7 +2,7 @@
 
 CC = gcc
 OPTIMIZATION_FLAGS = -O1
-DEBUG_FLAGS = 
+DEBUG_FLAGS =
 
 UNAME := $(shell uname)
 ifeq ($(UNAME),Linux)

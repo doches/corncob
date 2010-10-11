@@ -25,3 +25,12 @@ gmon.out
 *.dat
 *.plt
 *.pdf
+*.eps
+*.report
+*debug*
+corpora/
+build/
+*.tex
+*.nlda*
+*.focw
+*.reps

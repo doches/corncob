@@ -202,3 +202,37 @@ void double_hash_printx(double_hash *hash, char *label)
     double_hash_foreach(hash, &double_hash_print_helper);
     printf(">\n");
 }
+
+double_hash *static_double_hash_intersect_other;
+double_hash *static_double_hash_intersection;
+void double_hash_intersection_helper(double_hash_element *element)
+{
+    if(double_hash_get(static_double_hash_intersect_other,element->key) != NULL) {
+        double_hash_add(static_double_hash_intersection,element->key,element->value);
+    }
+}
+
+double_hash *double_hash_intersection(double_hash *a, double_hash *b)
+{
+    double_hash *intersect = double_hash_new(a->size > b->size ? a->size : b->size);
+    static_double_hash_intersect_other = b;
+    static_double_hash_intersection = intersect;
+    double_hash_foreach(a,&double_hash_intersection_helper);
+    return intersect;
+}
+
+WordMap *static_double_hash_print_wordmap;
+void double_hash_print_labeled_helper(double_hash_element *element)
+{
+    printf("%s (%f), ",WordMap_reverse_lookup(static_double_hash_print_wordmap, element->key),element->value);
+}
+
+void double_hash_print_labeled(double_hash *hash,char *label,WordMap *wordmap)
+{
+    printf("%s <",label);
+    
+    static_double_hash_print_wordmap = wordmap;
+    double_hash_foreach(hash, &double_hash_print_labeled_helper);
+    static_double_hash_print_wordmap = NULL;
+    printf(">\n");
+}
