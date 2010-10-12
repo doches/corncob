@@ -53,6 +53,10 @@ typedef struct OCW_t
     
     // Map WordMap values -> target indices
     ct_hash *wordmap_to_target;
+    
+    // Output interim feature and ppmi vectors?
+    int output_meanings;
+    int output_counts;
 } OCW;
 
 OCW *OCW_new(char *filename, double threshold, int interval);
@@ -61,6 +65,7 @@ void OCW_free(OCW *model);
 void OCW_save_wordmap(OCW *model);
 void OCW_save_categorization(OCW *model);
 void OCW_save_representations(OCW *model);
+void OCW_save_meanings(OCW *model);
 void array_shuffle(Pair *array,unsigned int size);
 double_hash *OCW_ppmi(OCW *model,int target_index);
 

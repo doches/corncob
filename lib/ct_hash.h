@@ -49,5 +49,7 @@ double hash_magnitude(ct_hash *a);
 double hash_cosine(ct_hash *a, ct_hash *b);
 ct_hash *hash_intersection(ct_hash *a, ct_hash *b);
 
+int hash_sanity_check(ct_hash *a);
+
 #endif
 

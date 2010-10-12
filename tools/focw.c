@@ -48,18 +48,22 @@ OCW *OCW_new(char *filename, double threshold, int interval)
     model->corpus_filename = filename;
     model->document_index = 0;
     model->num_targets = 0;
-    model->max_targets = 600;
+    model->max_targets = 2000;
     model->num_categories = 0;
-    model->assignments = unsigned_array_new(600);
+    model->assignments = unsigned_array_new(2000);
     model->targets = (ct_hash **)malloc(sizeof(ct_hash *)*model->max_targets);
     for (int i=0; i<model->max_targets; i++) {
         model->targets[i] = NULL;
     }
-    model->wordmap_to_target = hash_new(600);
+    model->wordmap_to_target = hash_new(2000);
     
     // PPMI
     model->f_xx = 0;
     model->context_counts = hash_new(2000);
+    
+    // Output interim counts and ppmi vectors?
+    model->output_counts = 1;
+    model->output_meanings = 1;
     
     return model;
 }
@@ -87,6 +91,7 @@ void OCW_each_document(unsigned int target, unsigned int *words, unsigned int le
     	return;
     
     // Look up the target index for this +target+
+//    hash_sanity_check(static_ocw_model->wordmap_to_target);
     hash_element *element = hash_get(static_ocw_model->wordmap_to_target, target);
     int index = 0; // +index+ is the index in model->targets for this target
     if (element != NULL) { // Success! We've seen this word before.
@@ -94,9 +99,9 @@ void OCW_each_document(unsigned int target, unsigned int *words, unsigned int le
     } else {               // +target+ is a new word, so add it.
         index = static_ocw_model->num_targets++;
         int category = static_ocw_model->num_categories++;
-        static_ocw_model->targets[index] = hash_new(32);
         hash_add(static_ocw_model->wordmap_to_target, target, index);
         unsigned_array_set(static_ocw_model->assignments, index, category);
+        static_ocw_model->targets[index] = hash_new(32);
     }
     
     // Update the frequency counts for this target
@@ -109,6 +114,7 @@ void OCW_each_document(unsigned int target, unsigned int *words, unsigned int le
         hash_update(static_ocw_model->context_counts, words[i], 1);
     }
     
+//    hash_sanity_check(static_ocw_model->wordmap_to_target);
     // Compute PPMI vector for this target
     double_hash *target_ppmi = OCW_ppmi(static_ocw_model,index);
 #ifdef DEBUG
@@ -193,10 +199,15 @@ void OCW_each_document(unsigned int target, unsigned int *words, unsigned int le
 #ifdef DEBUG
     printf("\n");
 #endif
-
     if (static_ocw_model->output_every_index > 0 && static_ocw_model->document_index % static_ocw_model->output_every_index == 0 && static_ocw_model->document_index != 0) {
         progressbar_finish(static_progress);
         OCW_save_categorization(static_ocw_model);
+        if(static_ocw_model->output_meanings) {
+        	OCW_save_meanings(static_ocw_model);
+        }
+        if(static_ocw_model->output_counts) {
+        	OCW_save_representations(static_ocw_model);
+        }
         static_progress = progressbar_new("Training", static_ocw_model->output_every_index);
     }
     progressbar_inc(static_progress);
@@ -229,14 +240,10 @@ void OCW_save_categorization(OCW *model)
     threshold_f[1] = '_';
     if (model->output_every_index > 0) {
         sprintf(save_f,"%s.%d.%s.focw",model->corpus_filename,model->document_index,threshold_f);
-#ifndef DEBUG        
         printf("Saving partial categorization %s\n",save_f);
-#endif
     } else {
         sprintf(save_f,"%s.focw",model->corpus_filename);
-#ifndef DEBUG
         printf("Saving final categorization %s\n",save_f);
-#endif        
     }
     FILE *fout = fopen(save_f,"w");
     for (int i=0; i<model->num_targets; i++) {
@@ -266,6 +273,25 @@ void OCW_save_representations(OCW *model)
 			fprintf(static_save_file,"%d ",element->key);
 			hash_foreach(model->targets[i],&OCW_save_representation);
 			fprintf(static_save_file,"\n");
+		}
+	}
+	fclose(static_save_file);
+}
+
+void OCW_save_meanings(OCW *model)
+{
+	char save_f[60];
+	char threshold_f[10];
+	sprintf(threshold_f,"%.2f",model->threshold);
+	threshold_f[1] = '_';
+	sprintf(save_f,"%s.%d.%s.ppmi",model->corpus_filename,model->document_index,threshold_f);
+	static_save_file = fopen(save_f,"w");
+	for(int i=0;i<model->max_targets;i++) {
+		if(model->targets[i] != NULL) {
+			double_hash *ppmi = OCW_ppmi(model,i);
+      hash_element *rev = hash_reverse_lookup(model->wordmap_to_target, i);
+      char *element_label = WordMap_reverse_lookup(model->corpus->wordmap, rev->key);
+      double_hash_fprint_labeled(static_save_file,ppmi,element_label,model->corpus->wordmap);
 		}
 	}
 	fclose(static_save_file);

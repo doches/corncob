@@ -35,7 +35,7 @@ ct_hash *hash_new(unsigned int buckets)
 		hash->buckets[i] = NULL;
 	}
 	hash->size = 0;
-    hash->sum = 0;
+	hash->sum = 0;
 	return hash;
 }
 
@@ -52,7 +52,7 @@ hash_element *hash_add(ct_hash *map,int key,unsigned int value)
 	unsigned int index = ct_h_hash(key,map->num_buckets);
 	hash_element *chain;
     
-    map->sum += value;
+  map->sum += value;
     
 	if (map->buckets[index] == NULL) {
 		map->buckets[index] = ct_h_element_new(key, value);
@@ -63,22 +63,22 @@ hash_element *hash_add(ct_hash *map,int key,unsigned int value)
 		while (chain->next != NULL) {
 			if (chain->key == key) {
 #ifdef DEBUG
-                fprintf(stderr,"[warn] Replacing key %d (%d) with %d\n",key,chain->value,value);
+				fprintf(stderr,"[warn] Replacing key %d (%d) with %d\n",key,chain->value,value);
 #endif
-                map->sum -= chain->value;
+				map->sum -= chain->value;
 				chain->value = value;
 				return chain;
 			}
 			chain = chain->next;
 		}
-        if (chain->key == key) {
+    if (chain->key == key) {
 #ifdef DEBUG
-            fprintf(stderr,"[warn] Replacing key %d (%d) with %d\n",key,chain->value,value);
+			fprintf(stderr,"[warn] Replacing key %d (%d) with %d\n",key,chain->value,value);
 #endif
-            map->sum -= chain->value;
-            chain->value = value;
-            return chain;
-        }
+      map->sum -= chain->value;
+      chain->value = value;
+      return chain;
+    }
 		chain->next = ct_h_element_new(key, value);
 		map->size++;
 		return chain->next;
@@ -93,7 +93,7 @@ hash_element *hash_update(ct_hash *map, int key, int change)
 		elem = hash_add(map,key,change);
 	} else {
 		elem->value += change;
-        map->sum += change;
+		map->sum += change;
 	}
 	return elem;
 }
@@ -220,4 +220,26 @@ ct_hash *hash_intersection(ct_hash *a, ct_hash *b)
   static_hash_intersection = intersect;
   hash_foreach(a,&hash_intersection_helper);
   return intersect;
+}
+
+int hash_sanity_check_bucket(hash_element *bucket)
+{
+	while(bucket != NULL) {
+		if (bucket->next == (hash_element *)0x20) {
+			printf("Failed ct_hash sanity check with 0x20 pointer\n");
+			return 0;
+		}
+		bucket = bucket->next;
+	}
+	return 1;
+}
+
+int hash_sanity_check(ct_hash *a)
+{
+	for(int i=0;i<a->num_buckets;i++) {
+		if (!hash_sanity_check_bucket(a->buckets[i])) {
+			return 0;
+		}	
+	}
+	return 1;
 }

@@ -222,17 +222,24 @@ double_hash *double_hash_intersection(double_hash *a, double_hash *b)
 }
 
 WordMap *static_double_hash_print_wordmap;
+FILE *static_dhplh_file;
 void double_hash_print_labeled_helper(double_hash_element *element)
 {
-    printf("%s (%f), ",WordMap_reverse_lookup(static_double_hash_print_wordmap, element->key),element->value);
+    fprintf(static_dhplh_file,"%s (%f), ",WordMap_reverse_lookup(static_double_hash_print_wordmap, element->key),element->value);
 }
 
 void double_hash_print_labeled(double_hash *hash,char *label,WordMap *wordmap)
 {
-    printf("%s <",label);
+	double_hash_fprint_labeled(stdout,hash,label,wordmap);
+}
+
+void double_hash_fprint_labeled(FILE *fout, double_hash *hash, char *label, WordMap *wordmap)
+{
+    fprintf(fout,"%s <",label);
     
+    static_dhplh_file = fout;
     static_double_hash_print_wordmap = wordmap;
     double_hash_foreach(hash, &double_hash_print_labeled_helper);
     static_double_hash_print_wordmap = NULL;
-    printf(">\n");
-}
+    fprintf(fout,">\n");
+}	
