@@ -57,13 +57,16 @@ OCW *OCW_new(char *filename, double threshold, int interval)
     }
     model->wordmap_to_target = hash_new(2000);
     
+    // Distances
+    model->distances = double_matrix_new(500, 500, 0.0);
+    
     // PPMI
     model->f_xx = 0;
     model->context_counts = hash_new(2000);
     
     // Output interim counts and ppmi vectors?
-    model->output_counts = 1;
-    model->output_meanings = 1;
+    model->output_counts = 0;
+    model->output_meanings = 0;
     
     return model;
 }
@@ -139,8 +142,8 @@ void OCW_each_document(unsigned int target, unsigned int *words, unsigned int le
             }
 #endif
             double_hash_free(other_ppmi);
-            static_ocw_model->distances[index][i] = distance;
-            static_ocw_model->distances[i][index] = distance;
+            double_matrix_set(static_ocw_model->distances, index, i, distance);
+            double_matrix_set(static_ocw_model->distances, i, index, distance);
         }
     }
     
@@ -150,7 +153,7 @@ void OCW_each_document(unsigned int target, unsigned int *words, unsigned int le
     double match_distance = static_ocw_model->threshold;
     for (int i=0; i<static_ocw_model->num_targets; i++) {
         if (index != i) {
-            double distance = static_ocw_model->distances[index][i];
+            double distance = double_matrix_get_zero(static_ocw_model->distances, index, i);
             if (distance > match_distance) {
                 // if two words are closely related, share a category
                 updates[num_updates].a = i;

@@ -157,7 +157,7 @@ cosine.o: lib/cosine.c lib/cosine.h
 	$(CC) -c $(CFLAGS) lib/cosine.c
 	
 # FoCW target
-FOCW_DEP = target_corpus.o WordMap.o progressbar.o statusbar.o focw.o unsigned_array.o word_hash.o LSH.o ct_hash.o double_hash.o ct_hash_print.o
+FOCW_DEP = target_corpus.o WordMap.o progressbar.o statusbar.o focw.o unsigned_array.o word_hash.o LSH.o ct_hash.o double_hash.o ct_hash_print.o double_matrix.o
 focw: $(FOCW_DEP)
 	$(CC) $(LFLAGS) -lgsl $(FOCW_DEP) -o focw
 

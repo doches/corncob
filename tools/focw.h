@@ -16,6 +16,7 @@
 #include "ct_hash.h"
 #include "ct_hash_print.h"
 #include "double_hash.h"
+#include "double_matrix.h"
 
 typedef struct Pair_t
 {
@@ -50,7 +51,7 @@ typedef struct OCW_t
     unsigned_array *assignments;
     unsigned int num_categories;
     // Previous best distances
-    double distances[550][550];
+    double_matrix *distances;
     
     // Map WordMap values -> target indices
     ct_hash *wordmap_to_target;
