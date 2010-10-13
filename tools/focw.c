@@ -62,7 +62,7 @@ OCW *OCW_new(char *filename, double threshold, int interval)
     model->context_counts = hash_new(2000);
     
     // Output interim counts and ppmi vectors?
-    model->output_counts = 1;
+    model->output_counts = 0;
     model->output_meanings = 1;
     
     return model;
@@ -70,7 +70,6 @@ OCW *OCW_new(char *filename, double threshold, int interval)
 
 void OCW_free(OCW *model)
 {
-    target_corpus_free(model->corpus);
     for (int i=0; i<model->num_targets; i++) {
         if (model->targets[i] != NULL) {
             hash_free(model->targets[i]);

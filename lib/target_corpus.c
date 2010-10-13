@@ -106,7 +106,10 @@ void target_corpus_each_document(target_corpus *corpus, void (*document_callback
 	target_corpus_document *doc = corpus->documents;
 	while(doc != NULL) {
 		(*document_callback)(doc->target,doc->words,doc->length);
+        target_corpus_document *old_doc = doc;
 		doc = doc->next;
+        free(old_doc->words);
+        free(old_doc);
 	}
 }
 
