@@ -5,3 +5,4 @@ rm *.dat
 rm *.png
 rm *.plt
 rm *.report
+rm *.eps
