@@ -62,7 +62,7 @@ OCW *OCW_new(char *filename, double threshold, int interval)
     model->context_counts = hash_new(2000);
     
     // Output interim counts and ppmi vectors?
-    model->output_counts = 0;
+    model->output_counts = 1;
     model->output_meanings = 1;
     
     return model;
@@ -260,12 +260,15 @@ void OCW_save_representations(OCW *model)
   sprintf(threshold_f,"%.2f",model->threshold);
   threshold_f[1] = '_';
   sprintf(save_f,"%s.%d.%s.reps",model->corpus_filename,model->document_index,threshold_f);
+  printf("Saving raw counts %s\n",save_f);
 	static_save_file = fopen(save_f,"w");
 	for(int i=0;i<model->max_targets;i++) {
 		if(model->targets[i] != NULL) {
       hash_element *rev = hash_reverse_lookup(model->wordmap_to_target, i);
       char *element_label = WordMap_reverse_lookup(model->corpus->wordmap, rev->key);
       hash_fprint_labeled(static_save_file,model->targets[i],element_label,model->corpus->wordmap);
+		} else {
+			break;
 		}
 	}
 	fclose(static_save_file);
@@ -278,6 +281,7 @@ void OCW_save_meanings(OCW *model)
 	sprintf(threshold_f,"%.2f",model->threshold);
 	threshold_f[1] = '_';
 	sprintf(save_f,"%s.%d.%s.ppmi",model->corpus_filename,model->document_index,threshold_f);
+  printf("Saving PPMI vectors %s\n",save_f);
 	static_save_file = fopen(save_f,"w");
 	for(int i=0;i<model->max_targets;i++) {
 		if(model->targets[i] != NULL) {
@@ -285,6 +289,8 @@ void OCW_save_meanings(OCW *model)
       hash_element *rev = hash_reverse_lookup(model->wordmap_to_target, i);
       char *element_label = WordMap_reverse_lookup(model->corpus->wordmap, rev->key);
       double_hash_fprint_labeled(static_save_file,ppmi,element_label,model->corpus->wordmap);
+		} else {
+			break;
 		}
 	}
 	fclose(static_save_file);
