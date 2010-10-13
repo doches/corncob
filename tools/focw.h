@@ -14,6 +14,7 @@
 #include "unsigned_array.h"
 #include "progressbar.h"
 #include "ct_hash.h"
+#include "ct_hash_print.h"
 #include "double_hash.h"
 
 typedef struct Pair_t

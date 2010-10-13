@@ -157,7 +157,7 @@ cosine.o: lib/cosine.c lib/cosine.h
 	$(CC) -c $(CFLAGS) lib/cosine.c
 	
 # FoCW target
-FOCW_DEP = target_corpus.o WordMap.o progressbar.o statusbar.o focw.o unsigned_array.o word_hash.o LSH.o ct_hash.o double_hash.o
+FOCW_DEP = target_corpus.o WordMap.o progressbar.o statusbar.o focw.o unsigned_array.o word_hash.o LSH.o ct_hash.o double_hash.o ct_hash_print.o
 focw: $(FOCW_DEP)
 	$(CC) $(LFLAGS) -lgsl $(FOCW_DEP) -o focw
 
@@ -169,6 +169,9 @@ LSH.o: lib/LSH.h lib/LSH.c
 	
 double_hash.o: lib/double_hash.h lib/double_hash.c
 	$(CC) -c $(CFLAGS) lib/double_hash.c
+	
+ct_hash_print.o: lib/ct_hash_print.h lib/ct_hash_print.c
+	$(CC) -c $(CFLAGS) lib/ct_hash_print.c
 
 .PHONY: clean doc all
 

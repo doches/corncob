@@ -254,11 +254,6 @@ void OCW_save_categorization(OCW *model)
 }
 
 FILE *static_save_file;
-void OCW_save_representation(hash_element *element)
-{
-	fprintf(static_save_file,"%d %d ",element->key,element->value);
-}
-
 void OCW_save_representations(OCW *model)
 {
   char save_f[60];
@@ -269,10 +264,9 @@ void OCW_save_representations(OCW *model)
 	static_save_file = fopen(save_f,"w");
 	for(int i=0;i<model->max_targets;i++) {
 		if(model->targets[i] != NULL) {
-			hash_element *element = hash_reverse_lookup(model->wordmap_to_target,i);
-			fprintf(static_save_file,"%d ",element->key);
-			hash_foreach(model->targets[i],&OCW_save_representation);
-			fprintf(static_save_file,"\n");
+      hash_element *rev = hash_reverse_lookup(model->wordmap_to_target, i);
+      char *element_label = WordMap_reverse_lookup(model->corpus->wordmap, rev->key);
+      hash_fprint_labeled(static_save_file,model->targets[i],element_label,model->corpus->wordmap);
 		}
 	}
 	fclose(static_save_file);
