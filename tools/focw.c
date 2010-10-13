@@ -146,7 +146,7 @@ void OCW_each_document(unsigned int target, unsigned int *words, unsigned int le
     }
     
     // Find nearest neighbors that need updating
-    Pair updates[600];
+    Pair updates[5000];
     unsigned int num_updates = 0;
     double match_distance = static_ocw_model->threshold;
     for (int i=0; i<static_ocw_model->num_targets; i++) {
