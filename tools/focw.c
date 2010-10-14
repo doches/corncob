@@ -147,14 +147,9 @@ void OCW_each_document(unsigned int target, unsigned int *words, unsigned int le
                 updates[num_updates].a = index;
                 num_updates++;
             } else if (distance > 0.0 && unsigned_array_get(static_ocw_model->assignments, index) == unsigned_array_get(static_ocw_model->assignments, i)) {
-                // If they're not closely related but share a category, split one off.
-                int split = index;
-                int from = i;
-                if (rand() < 0.5) {
-                    split = i;
-                    from = index;
-                }
-                unsigned_array_set(static_ocw_model->assignments,split,static_ocw_model->num_categories++);
+                // If they're not closely related but share a category, split.
+                unsigned_array_set(static_ocw_model->assignments,index,static_ocw_model->num_categories++);
+                unsigned_array_set(static_ocw_model->assignments,i,static_ocw_model->num_categories++);
             }
         }
     }
