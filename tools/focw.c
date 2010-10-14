@@ -150,7 +150,7 @@ void OCW_each_document(unsigned int target, unsigned int *words, unsigned int le
     }
     if (best_index >= 0) {
         int i = index,j = best_index;
-        if (rand()/100 > 50) {
+        if (0 && rand()/100 > 50) {
             i = best_index;
             j = index;
         }
