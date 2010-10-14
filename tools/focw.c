@@ -93,12 +93,13 @@ void OCW_each_document(unsigned int target, unsigned int *words, unsigned int le
     	return;
     
     // Look up the target index for this +target+
-//    hash_sanity_check(static_ocw_model->wordmap_to_target);
     hash_element *element = hash_get(static_ocw_model->wordmap_to_target, target);
     int index = 0; // +index+ is the index in model->targets for this target
-    if (element != NULL) { // Success! We've seen this word before.
+    if (element != NULL) {
+        // Success! We've seen this word before.
         index = element->value;
-    } else {               // +target+ is a new word, so add it.
+    } else {
+        // +target+ is a new word, so add it.
         index = static_ocw_model->num_targets++;
         int category = static_ocw_model->num_categories++;
         hash_add(static_ocw_model->wordmap_to_target, target, index);
@@ -116,31 +117,14 @@ void OCW_each_document(unsigned int target, unsigned int *words, unsigned int le
         hash_update(static_ocw_model->context_counts, words[i], 1);
     }
     
-//    hash_sanity_check(static_ocw_model->wordmap_to_target);
     // Compute PPMI vector for this target
     double_hash *target_ppmi = OCW_ppmi(static_ocw_model,index);
-#ifdef DEBUG
-    hash_element *revx = hash_reverse_lookup(static_ocw_model->wordmap_to_target, index);
-    char *elementx_label = WordMap_reverse_lookup(static_ocw_model->corpus->wordmap, revx->key);
-    double_hash_print_labeled(target_ppmi,elementx_label,static_ocw_model->corpus->wordmap);
-//    hash_printx(static_ocw_model->targets[index],elementx_label);
-#endif
     
     // Update distance matrix
     for (int i=0; i<static_ocw_model->num_targets; i++) {
         if (i != index) { // Don't compute distance between target and itself
             double_hash *other_ppmi = OCW_ppmi(static_ocw_model, i);
             double distance = double_hash_cosine(target_ppmi,other_ppmi);
-#ifdef DEBUG
-            double_hash *element_intersect = double_hash_intersection(other_ppmi, target_ppmi);
-            if (element_intersect->size > 0) {
-                int last_printed = 0;
-                printf("  ( %.4f )  %n",distance,&last_printed);
-                hash_element *rev = hash_reverse_lookup(static_ocw_model->wordmap_to_target, i);
-                char *element_label = WordMap_reverse_lookup(static_ocw_model->corpus->wordmap, rev->key);
-                double_hash_print_labeled(element_intersect,element_label,static_ocw_model->corpus->wordmap);
-            }
-#endif
             double_hash_free(other_ppmi);
             double_matrix_set(static_ocw_model->distances, index, i, distance);
             double_matrix_set(static_ocw_model->distances, i, index, distance);
@@ -170,37 +154,20 @@ void OCW_each_document(unsigned int target, unsigned int *words, unsigned int le
                     split = i;
                     from = index;
                 }
-#ifdef DEBUG
-                char *a = WordMap_reverse_lookup(static_ocw_model->corpus->wordmap, hash_reverse_lookup(static_ocw_model->wordmap_to_target, split)->key);
-                char *b = WordMap_reverse_lookup(static_ocw_model->corpus->wordmap, hash_reverse_lookup(static_ocw_model->wordmap_to_target, from)->key);
-                printf("%s (%d) <- %d (too dissimilar from %s (%d))\n",a,unsigned_array_get(static_ocw_model->assignments,split),static_ocw_model->num_categories,b,unsigned_array_get(static_ocw_model->assignments,from));;
-#endif
                 unsigned_array_set(static_ocw_model->assignments,split,static_ocw_model->num_categories++);
             }
         }
     }
     
-#ifdef DEBUG
-    printf("\n");
-#endif
-    
     // Do CW
     if(num_updates > 0) {
       array_shuffle(updates,num_updates);
       for (int i=0; i<num_updates; i++) {
-#ifdef DEBUG
-          char *a = WordMap_reverse_lookup(static_ocw_model->corpus->wordmap, hash_reverse_lookup(static_ocw_model->wordmap_to_target, updates[i].a)->key);
-          char *b = WordMap_reverse_lookup(static_ocw_model->corpus->wordmap, hash_reverse_lookup(static_ocw_model->wordmap_to_target, updates[i].b)->key);
-          printf("%s (%d) <- %s (%d)\n",a,unsigned_array_get(static_ocw_model->assignments, updates[i].a),b,unsigned_array_get(static_ocw_model->assignments, updates[i].b));
-#endif
           unsigned_array_set(static_ocw_model->assignments, updates[i].a, unsigned_array_get(static_ocw_model->assignments, updates[i].b));
       }
     }
     double_hash_free(target_ppmi);
     
-#ifdef DEBUG
-    printf("\n");
-#endif
     if (static_ocw_model->output_every_index > 0 && static_ocw_model->document_index % static_ocw_model->output_every_index == 0 && static_ocw_model->document_index != 0) {
         progressbar_finish(static_progress);
         OCW_save_categorization(static_ocw_model);
