@@ -138,7 +138,7 @@ void OCW_each_document(unsigned int target, unsigned int *words, unsigned int le
     for (int i=0; i<static_ocw_model->num_targets; i++) {
         if (index != i) {
             double distance = double_matrix_get_zero(static_ocw_model->distances, index, i);
-            if (distance > match_distance && distance > best_distance) {
+            if (distance > best_distance) {
                 best_index = i;
                 best_distance = distance;
             } else if (distance > 0.0 && distance < match_distance && unsigned_array_get(static_ocw_model->assignments, index) == unsigned_array_get(static_ocw_model->assignments, i)) {
