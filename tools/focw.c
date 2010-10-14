@@ -132,20 +132,15 @@ void OCW_each_document(unsigned int target, unsigned int *words, unsigned int le
     }
     
     // Find nearest neighbors that need updating
-    Pair updates[5000];
-    unsigned int num_updates = 0;
+    double best_distance = 0.0;
+    int best_index = -1;
     double match_distance = static_ocw_model->threshold;
     for (int i=0; i<static_ocw_model->num_targets; i++) {
         if (index != i) {
             double distance = double_matrix_get_zero(static_ocw_model->distances, index, i);
-            if (distance > match_distance) {
-                // if two words are closely related, share a category
-                updates[num_updates].a = i;
-                updates[num_updates].b = index;
-                num_updates++;
-                updates[num_updates].b = i;
-                updates[num_updates].a = index;
-                num_updates++;
+            if (distance > match_distance && distance > best_distance) {
+                best_index = i;
+                best_distance = distance;
             } else if (distance > 0.0 && unsigned_array_get(static_ocw_model->assignments, index) == unsigned_array_get(static_ocw_model->assignments, i)) {
                 // If they're not closely related but share a category, split.
                 unsigned_array_set(static_ocw_model->assignments,index,static_ocw_model->num_categories++);
@@ -153,14 +148,15 @@ void OCW_each_document(unsigned int target, unsigned int *words, unsigned int le
             }
         }
     }
-    
-    // Do CW
-    if(num_updates > 0) {
-      array_shuffle(updates,num_updates);
-      for (int i=0; i<num_updates; i++) {
-          unsigned_array_set(static_ocw_model->assignments, updates[i].a, unsigned_array_get(static_ocw_model->assignments, updates[i].b));
-      }
+    if (best_index >= 0) {
+        int i = index,j = best_index;
+        if (rand()/100 > 50) {
+            i = best_index;
+            j = index;
+        }
+        unsigned_array_set(static_ocw_model->assignments, i, unsigned_array_get(static_ocw_model->assignments, j));    
     }
+    
     double_hash_free(target_ppmi);
     
     if (static_ocw_model->output_every_index > 0 && static_ocw_model->document_index % static_ocw_model->output_every_index == 0 && static_ocw_model->document_index != 0) {
