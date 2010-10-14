@@ -141,7 +141,7 @@ void OCW_each_document(unsigned int target, unsigned int *words, unsigned int le
             if (distance > match_distance && distance > best_distance) {
                 best_index = i;
                 best_distance = distance;
-            } else if (distance > 0.0 && unsigned_array_get(static_ocw_model->assignments, index) == unsigned_array_get(static_ocw_model->assignments, i)) {
+            } else if (distance > 0.0 && distance < match_distance && unsigned_array_get(static_ocw_model->assignments, index) == unsigned_array_get(static_ocw_model->assignments, i)) {
                 // If they're not closely related but share a category, split.
                 unsigned_array_set(static_ocw_model->assignments,index,static_ocw_model->num_categories++);
                 unsigned_array_set(static_ocw_model->assignments,i,static_ocw_model->num_categories++);
