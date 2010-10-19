@@ -24,8 +24,12 @@ typedef struct Pair_t
     unsigned int b;
 } Pair;
 
+typedef enum {TOP, VOTE, NEAREST} algorithm;
+
 typedef struct OCW_t
 {
+    // algorithm to use for updates
+    algorithm update_method;
     // threshold for updating category assignments
     double threshold;
     // Output current categorization per Nth document
@@ -55,13 +59,9 @@ typedef struct OCW_t
     
     // Map WordMap values -> target indices
     ct_hash *wordmap_to_target;
-    
-    // Output interim feature and ppmi vectors?
-    int output_meanings;
-    int output_counts;
 } OCW;
 
-OCW *OCW_new(char *filename, double threshold, int interval);
+OCW *OCW_new(char *filename, algorithm alg, double threshold, int interval);
 void OCW_train(OCW *model);
 void OCW_free(OCW *model);
 void OCW_save_wordmap(OCW *model);

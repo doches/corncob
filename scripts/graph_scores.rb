@@ -29,7 +29,7 @@ Dir.foreach(input) do |file|
 			end
 			corpus = _corpus
 			docindex = components.shift.to_i
-			_threshold = components.shift.gsub("_",".").to_f
+			_threshold = components.shift
 			if not threshold.nil? and threshold != _threshold
 				STDERR.puts "[warn] Multiple thresholds in plot (#{threshold} and #{_threshold})"
 			end

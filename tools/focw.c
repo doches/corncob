@@ -16,33 +16,74 @@
 #include <assert.h>
 #include <math.h>
 
+void print_usage(const char *error)
+{
+    printf("Usage: focw <corpus> <interval> [update method]\n");
+    printf("\n[update method] may be one of:\n");
+    printf("\ttop\n");
+    printf("\tnearest\n");
+    printf("\tvote <threshold>\n");
+    printf("\n%s\n",error);
+    
+    exit(1);
+}
+
+void usage()
+{
+    print_usage("");
+}
+
 int main(int argc, char **argv)
 {
-	if(argc < 3) {
-		printf("focw expects 2-3 argument, recieved %d\n",argc-1);
-		printf("\nUsage: focw <corpus> <threshold> [interval]\n");
-		return 1;
-	}
-    
-    int interval = -1;
-    if (argc >= 4) {
-        interval = atoi(argv[3]);
+    if (argc < 3) {
+        if (argc < 2) {
+            print_usage("No target corpus or output interval specified");
+        } else {
+            print_usage("No output interval specified");
+        }
     }
+
+    // Target corpus
+    char *corpus = argv[1];
     
+    int interval = atoi(argv[2]);
+    
+    // Update algorithm. Some algorithms take additional parameters...
+    algorithm update_method = TOP;
+    double threshold = 0.0;
+    if (argc > 3) {
+        const char *method = argv[3];
+        if (!strcmp(method,"top")) {
+            update_method = TOP;
+        } else if (!strcmp(method,"nearest")) {
+            update_method = NEAREST;
+        } else if (!strcmp(method,"vote")) {
+            update_method = VOTE;
+            if (argc < 5) {
+                print_usage("'top' requires an additional parameter");
+            }
+            threshold = atof(argv[4]);
+        } else {
+            print_usage("Too many arguments!");
+        }
+    } else {
+        printf("No update method specified, assuming top...\n");
+    }
+        
     srand(time(NULL));
-    OCW *model = OCW_new(argv[1],atof(argv[2]),interval);
+    OCW *model = OCW_new(corpus,update_method,threshold,interval);
     OCW_save_wordmap(model);
     OCW_train(model);
     OCW_save_categorization(model);
     printf("OCW trial (%s %f %d) complete!\n",model->corpus_filename,model->threshold,model->output_every_index);
-//    OCW_free(model);
     
 	return 0;
 }
 
-OCW *OCW_new(char *filename, double threshold, int interval)
+OCW *OCW_new(char *filename, algorithm alg, double threshold, int interval)
 {
     OCW *model = (OCW *)malloc(sizeof(OCW));
+    model->update_method = alg;
     model->threshold = threshold;
     model->output_every_index = interval;
     model->corpus = target_corpus_new(filename);
@@ -64,10 +105,6 @@ OCW *OCW_new(char *filename, double threshold, int interval)
     // PPMI
     model->f_xx = 0;
     model->context_counts = hash_new(2000);
-    
-    // Output interim counts and ppmi vectors?
-    model->output_counts = 0;
-    model->output_meanings = 0;
     
     return model;
 }
@@ -134,17 +171,44 @@ void OCW_each_document(unsigned int target, unsigned int *words, unsigned int le
     
     // Find highest ranked category in neighboorhood
     double_hash *class_distances = double_hash_new(static_ocw_model->num_categories/3);
+    int best_index = index;
+    double best_distance = 0.0;
     for (int i=0; i<static_ocw_model->num_targets; i++) {
         if (index != i) {
             double distance = double_matrix_get_zero(static_ocw_model->distances, index, i);
             if (distance > 0) {
                 unsigned int category = unsigned_array_get(static_ocw_model->assignments, i);
-                double_hash_add(class_distances, category, distance);            
+                double_hash_add(class_distances, category, distance);
+                
+                if (distance > best_distance) {
+                    best_index = i;
+                    best_distance = distance;
+                }
             }
         }
     }
+    
+    // Update class assignment based on specified update method (see CW manual for more info)
     if (class_distances->size > 0) {
-        unsigned_array_set(static_ocw_model->assignments, index, double_hash_largest_key(class_distances));
+        int best_key;
+        double best_value;
+        switch (static_ocw_model->update_method) {
+            case NEAREST:
+                unsigned_array_set(static_ocw_model->assignments, index, unsigned_array_get(static_ocw_model->assignments, best_index));
+                break;
+            case TOP:
+                unsigned_array_set(static_ocw_model->assignments, index, double_hash_largest_key(class_distances));
+                break;
+            case VOTE:
+                best_key = double_hash_largest_key(class_distances);
+                best_value = double_hash_get(class_distances, best_key)->value;
+                if (best_value > static_ocw_model->threshold) {
+                    unsigned_array_set(static_ocw_model->assignments, index, best_key);
+                }
+                break;
+            default:
+                break;
+        }
     }
     double_hash_free(class_distances);
     
@@ -153,12 +217,6 @@ void OCW_each_document(unsigned int target, unsigned int *words, unsigned int le
     if (static_ocw_model->output_every_index > 0 && static_ocw_model->document_index % static_ocw_model->output_every_index == 0 && static_ocw_model->document_index != 0) {
         progressbar_finish(static_progress);
         OCW_save_categorization(static_ocw_model);
-        if(static_ocw_model->output_meanings) {
-        	OCW_save_meanings(static_ocw_model);
-        }
-        if(static_ocw_model->output_counts) {
-        	OCW_save_representations(static_ocw_model);
-        }
         static_progress = progressbar_new("Training", static_ocw_model->output_every_index);
     }
     progressbar_inc(static_progress);
@@ -174,6 +232,25 @@ void OCW_train(OCW *model)
     static_ocw_model = NULL;
 }
 
+const char *OCW_method_str_map(OCW *model)
+{
+    char *str;
+    switch (model->update_method) {
+        case TOP:
+            return "top";
+        case NEAREST:
+            return "nearest";
+        case VOTE:
+            str = (char *)malloc(sizeof(char) * 10);
+            str[9] = '\0';
+            sprintf(str,"vote_%1.2f",model->threshold);
+            str[6] = '_';
+            return str;
+        default:
+            return "UNKNOWN";
+    }
+}
+
 void OCW_save_wordmap(OCW *model)
 {
     char *wordmap_f = (char *)malloc(strlen(model->corpus_filename)+9);
@@ -186,16 +263,8 @@ void OCW_save_wordmap(OCW *model)
 void OCW_save_categorization(OCW *model)
 {
     char save_f[60];
-    char threshold_f[10];
-    sprintf(threshold_f,"%.2f",model->threshold);
-    threshold_f[1] = '_';
-    if (model->output_every_index > 0) {
-        sprintf(save_f,"%s.%d.%s.focw",model->corpus_filename,model->document_index,threshold_f);
-        printf("Saving partial categorization %s\n",save_f);
-    } else {
-        sprintf(save_f,"%s.focw",model->corpus_filename);
-        printf("Saving final categorization %s\n",save_f);
-    }
+    sprintf(save_f,"%s.%d.%s.focw",model->corpus_filename,model->document_index,OCW_method_str_map(model));
+    printf("Saving categorization %s\n",save_f);
     FILE *fout = fopen(save_f,"w");
     for (int i=0; i<model->num_targets; i++) {
         int index = hash_reverse_lookup(model->wordmap_to_target, i)->key;
@@ -207,45 +276,45 @@ void OCW_save_categorization(OCW *model)
 FILE *static_save_file;
 void OCW_save_representations(OCW *model)
 {
-  char save_f[60];
-  char threshold_f[10];
-  sprintf(threshold_f,"%.2f",model->threshold);
-  threshold_f[1] = '_';
-  sprintf(save_f,"%s.%d.%s.reps",model->corpus_filename,model->document_index,threshold_f);
-  printf("Saving raw counts %s\n",save_f);
-	static_save_file = fopen(save_f,"w");
-	for(int i=0;i<model->max_targets;i++) {
-		if(model->targets[i] != NULL) {
-      hash_element *rev = hash_reverse_lookup(model->wordmap_to_target, i);
-      char *element_label = WordMap_reverse_lookup(model->corpus->wordmap, rev->key);
-      hash_fprint_labeled(static_save_file,model->targets[i],element_label,model->corpus->wordmap);
-		} else {
-			break;
-		}
-	}
-	fclose(static_save_file);
+//  char save_f[60];
+//  char threshold_f[10];
+//  sprintf(threshold_f,"%.2f",model->threshold);
+//  threshold_f[1] = '_';
+//  sprintf(save_f,"%s.%d.%s.reps",model->corpus_filename,model->document_index,threshold_f);
+//  printf("Saving raw counts %s\n",save_f);
+//	static_save_file = fopen(save_f,"w");
+//	for(int i=0;i<model->max_targets;i++) {
+//		if(model->targets[i] != NULL) {
+//      hash_element *rev = hash_reverse_lookup(model->wordmap_to_target, i);
+//      char *element_label = WordMap_reverse_lookup(model->corpus->wordmap, rev->key);
+//      hash_fprint_labeled(static_save_file,model->targets[i],element_label,model->corpus->wordmap);
+//		} else {
+//			break;
+//		}
+//	}
+//	fclose(static_save_file);
 }
 
 void OCW_save_meanings(OCW *model)
 {
-	char save_f[60];
-	char threshold_f[10];
-	sprintf(threshold_f,"%.2f",model->threshold);
-	threshold_f[1] = '_';
-	sprintf(save_f,"%s.%d.%s.ppmi",model->corpus_filename,model->document_index,threshold_f);
-  printf("Saving PPMI vectors %s\n",save_f);
-	static_save_file = fopen(save_f,"w");
-	for(int i=0;i<model->max_targets;i++) {
-		if(model->targets[i] != NULL) {
-			double_hash *ppmi = OCW_ppmi(model,i);
-      hash_element *rev = hash_reverse_lookup(model->wordmap_to_target, i);
-      char *element_label = WordMap_reverse_lookup(model->corpus->wordmap, rev->key);
-      double_hash_fprint_labeled(static_save_file,ppmi,element_label,model->corpus->wordmap);
-		} else {
-			break;
-		}
-	}
-	fclose(static_save_file);
+//	char save_f[60];
+//	char threshold_f[10];
+//	sprintf(threshold_f,"%.2f",model->threshold);
+//	threshold_f[1] = '_';
+//	sprintf(save_f,"%s.%d.%s.ppmi",model->corpus_filename,model->document_index,threshold_f);
+//  printf("Saving PPMI vectors %s\n",save_f);
+//	static_save_file = fopen(save_f,"w");
+//	for(int i=0;i<model->max_targets;i++) {
+//		if(model->targets[i] != NULL) {
+//			double_hash *ppmi = OCW_ppmi(model,i);
+//      hash_element *rev = hash_reverse_lookup(model->wordmap_to_target, i);
+//      char *element_label = WordMap_reverse_lookup(model->corpus->wordmap, rev->key);
+//      double_hash_fprint_labeled(static_save_file,ppmi,element_label,model->corpus->wordmap);
+//		} else {
+//			break;
+//		}
+//	}
+//	fclose(static_save_file);
 }
 
 void swap_pair(Pair *a, Pair *b)
