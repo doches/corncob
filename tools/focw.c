@@ -34,7 +34,8 @@ int main(int argc, char **argv)
     OCW_save_wordmap(model);
     OCW_train(model);
     OCW_save_categorization(model);
-    OCW_free(model);
+    printf("OCW trial (%s %f %d) complete!\n",model->corpus_filename,model->threshold,model->output_every_index);
+//    OCW_free(model);
     
 	return 0;
 }
@@ -144,17 +145,12 @@ void OCW_each_document(unsigned int target, unsigned int *words, unsigned int le
             }
             if (distance < match_distance && unsigned_array_get(static_ocw_model->assignments, index) == unsigned_array_get(static_ocw_model->assignments, i)) {
                 // If they're not closely related but share a category, split.
-//                unsigned_array_set(static_ocw_model->assignments,index,static_ocw_model->num_categories++);
                 unsigned_array_set(static_ocw_model->assignments,i,static_ocw_model->num_categories++);
             }
         }
     }
     if (best_index >= 0) {
         int i = index,j = best_index;
-        if (0 && rand()/100 > 50) {
-            i = best_index;
-            j = index;
-        }
         unsigned_array_set(static_ocw_model->assignments, i, unsigned_array_get(static_ocw_model->assignments, j));    
     }
     
