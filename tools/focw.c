@@ -132,27 +132,21 @@ void OCW_each_document(unsigned int target, unsigned int *words, unsigned int le
         }
     }
     
-    // Find nearest neighbors that need updating
-    double best_distance = 0.0;
-    int best_index = -1;
-    double match_distance = static_ocw_model->threshold;
+    // Find highest ranked category in neighboorhood
+    double_hash *class_distances = double_hash_new(static_ocw_model->num_categories/3);
     for (int i=0; i<static_ocw_model->num_targets; i++) {
         if (index != i) {
             double distance = double_matrix_get_zero(static_ocw_model->distances, index, i);
-            if (distance > best_distance) {
-                best_index = i;
-                best_distance = distance;
-            }
-            if (distance < match_distance && unsigned_array_get(static_ocw_model->assignments, index) == unsigned_array_get(static_ocw_model->assignments, i)) {
-                // If they're not closely related but share a category, split.
-                unsigned_array_set(static_ocw_model->assignments,i,static_ocw_model->num_categories++);
+            if (distance > 0) {
+                unsigned int category = unsigned_array_get(static_ocw_model->assignments, i);
+                double_hash_add(class_distances, category, distance);            
             }
         }
     }
-    if (best_index >= 0) {
-        int i = index,j = best_index;
-        unsigned_array_set(static_ocw_model->assignments, i, unsigned_array_get(static_ocw_model->assignments, j));    
+    if (class_distances->size > 0) {
+        unsigned_array_set(static_ocw_model->assignments, index, double_hash_largest_key(class_distances));
     }
+    double_hash_free(class_distances);
     
     double_hash_free(target_ppmi);
     

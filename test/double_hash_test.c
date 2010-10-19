@@ -102,5 +102,13 @@ void test_double_hash()
     double_hash_add(sum, 1, 5);
     assert(sum->sum == 8);
     double_hash_free(sum);
+    
+    // Test largest key
+    double_hash *floats = double_hash_new(5);
+    double_hash_add(floats, 0, 0.2);
+    double_hash_add(floats, 1, 0.4);
+    double_hash_add(floats, 2, 0.1);
+    printf("%d\n",double_hash_largest_key(floats));
+    assert(double_hash_largest_key(floats) == 1);
 }
 

@@ -243,3 +243,21 @@ void double_hash_fprint_labeled(FILE *fout, double_hash *hash, char *label, Word
     static_double_hash_print_wordmap = NULL;
     fprintf(fout,">\n");
 }	
+
+double _static_double_hash_largest_key_helper_value;
+int _static_double_hash_largest_key_helper_index;
+
+void double_hash_largest_key_helper(double_hash_element *element)
+{
+    if (element->value > _static_double_hash_largest_key_helper_value) {
+        _static_double_hash_largest_key_helper_index = element->key;
+        _static_double_hash_largest_key_helper_value = element->value;
+    }
+}
+
+int double_hash_largest_key(double_hash *hash)
+{
+    _static_double_hash_largest_key_helper_value = 0.0;
+    double_hash_foreach(hash, &double_hash_largest_key_helper);
+    return _static_double_hash_largest_key_helper_index;
+}

@@ -47,6 +47,7 @@ void double_hash_printx(double_hash *hash,char *label);
 double_hash *double_hash_intersection(double_hash *a, double_hash *b);
 void double_hash_print_labeled(double_hash *hash,char *label,WordMap *wordmap);
 void double_hash_fprint_labeled(FILE *fout,double_hash *hash,char *label,WordMap *wordmap);
+int double_hash_largest_key(double_hash *hash);
 
 double double_hash_dot(double_hash *a, double_hash *b);
 double double_hash_magnitude(double_hash *a);
