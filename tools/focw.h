@@ -39,6 +39,7 @@ typedef struct OCW_t
     target_corpus *corpus;
     char *corpus_filename;
     unsigned int document_index;
+    unsigned int skip_documents;
     
     // Store target-word co-occurrence matrix in an array of arrays.
     ct_hash **targets;
@@ -62,12 +63,14 @@ typedef struct OCW_t
 } OCW;
 
 OCW *OCW_new(char *filename, algorithm alg, double threshold, int interval);
+OCW *OCW_resume(char *focw_filename, char *corpus_filename, int document_index, algorithm alg, double threshold, int interval);
 void OCW_train(OCW *model);
 void OCW_free(OCW *model);
 void OCW_save_wordmap(OCW *model);
 void OCW_save_categorization(OCW *model);
 void OCW_save_representations(OCW *model);
 void OCW_save_meanings(OCW *model);
+void OCW_save_target_wordmap(OCW *model);
 void array_shuffle(Pair *array,unsigned int size);
 double_hash *OCW_ppmi(OCW *model,int target_index);
 

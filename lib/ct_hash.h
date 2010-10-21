@@ -22,7 +22,6 @@ typedef struct _hash_element {
 	unsigned int value;
 } hash_element;
 
-
 /********** Hash Map ****************/
 
 // Hash map containing N buckets (chains) of hash_element.
@@ -43,6 +42,9 @@ hash_element *hash_reverse_lookup(ct_hash *map, int value);
 double hash_cosine(ct_hash *a, ct_hash *b);
 void hash_print(ct_hash *hash);
 void hash_printx(ct_hash *hash, char *label);
+
+void hash_save(ct_hash *hash, const char *filename);
+ct_hash *hash_load(const char *filename);
 
 double hash_dot(ct_hash *a, ct_hash *b);
 double hash_magnitude(ct_hash *a);

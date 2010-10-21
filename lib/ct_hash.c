@@ -11,6 +11,7 @@
 #include <math.h>
 #include <assert.h>
 #include <stdio.h>
+#include <string.h>
 
 /*********** Hash Element **************/
 
@@ -242,4 +243,44 @@ int hash_sanity_check(ct_hash *a)
 		}	
 	}
 	return 1;
+}
+
+FILE *static_hash_fout;
+void hash_save_helper(hash_element *element)
+{
+    fprintf(static_hash_fout,"%d\t%u\n",element->key,element->value);
+}
+
+void hash_save(ct_hash *hash, const char *filename)
+{
+    static_hash_fout = fopen(filename,"w");
+    hash_foreach(hash, &hash_save_helper);
+    fclose(static_hash_fout);
+}
+
+ct_hash *hash_load(const char *filename)
+{
+    ct_hash *hash = hash_new(2000);
+    
+    FILE *fin = fopen(filename,"r");
+    char line[80];
+    while (!feof(fin)) {
+        fgets(line,80,fin);
+        
+        char key_s[10];
+        strcpy(key_s,strtok(line,"\t"));
+        int key = atoi(key_s);
+        
+        char value_s[10];
+        char *v = strtok(NULL,"\t");
+        if (v == NULL) {
+            break;
+        }
+        strcpy(value_s,v);
+        unsigned int value = atoi(value_s);
+        
+        hash_add(hash, key, value);
+    }
+    fclose(fin);
+    return hash;
 }
