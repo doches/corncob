@@ -217,6 +217,7 @@ void OCW_each_document(unsigned int target, unsigned int *words, unsigned int le
     if (static_ocw_model->output_every_index > 0 && static_ocw_model->document_index % static_ocw_model->output_every_index == 0 && static_ocw_model->document_index != 0) {
         progressbar_finish(static_progress);
         OCW_save_categorization(static_ocw_model);
+        OCW_save_representations(static_ocw_model);
         static_progress = progressbar_new("Training", static_ocw_model->output_every_index);
     }
     progressbar_inc(static_progress);
@@ -276,23 +277,20 @@ void OCW_save_categorization(OCW *model)
 FILE *static_save_file;
 void OCW_save_representations(OCW *model)
 {
-//  char save_f[60];
-//  char threshold_f[10];
-//  sprintf(threshold_f,"%.2f",model->threshold);
-//  threshold_f[1] = '_';
-//  sprintf(save_f,"%s.%d.%s.reps",model->corpus_filename,model->document_index,threshold_f);
-//  printf("Saving raw counts %s\n",save_f);
-//	static_save_file = fopen(save_f,"w");
-//	for(int i=0;i<model->max_targets;i++) {
-//		if(model->targets[i] != NULL) {
-//      hash_element *rev = hash_reverse_lookup(model->wordmap_to_target, i);
-//      char *element_label = WordMap_reverse_lookup(model->corpus->wordmap, rev->key);
-//      hash_fprint_labeled(static_save_file,model->targets[i],element_label,model->corpus->wordmap);
-//		} else {
-//			break;
-//		}
-//	}
-//	fclose(static_save_file);
+    char save_f[60];
+    sprintf(save_f,"%s.%d.%s.reps",model->corpus_filename,model->document_index,OCW_method_str_map(model));
+    printf("Saving raw counts %s\n",save_f);
+	static_save_file = fopen(save_f,"w");
+	for(int i=0;i<model->max_targets;i++) {
+		if(model->targets[i] != NULL) {
+            hash_element *rev = hash_reverse_lookup(model->wordmap_to_target, i);
+            char *element_label = WordMap_reverse_lookup(model->corpus->wordmap, rev->key);
+            hash_fprint(static_save_file,model->targets[i],element_label);
+		} else {
+			break;
+		}
+	}
+	fclose(static_save_file);
 }
 
 void OCW_save_meanings(OCW *model)

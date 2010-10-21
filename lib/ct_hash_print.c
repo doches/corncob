@@ -22,3 +22,17 @@ void hash_fprint_labeled(FILE *fout, ct_hash *hash, char *label, WordMap *wordma
 	static_hash_print_wordmap = NULL;   
   fprintf(fout,">\n");
 }
+
+void hash_fprint_helper(hash_element *element)
+{
+    fprintf(static_hplh_file,"%d (%d), ",element->key,element->value);
+}
+
+void hash_fprint(FILE *fout, ct_hash *hash, char *label)
+{
+    fprintf(fout,"%s <",label);
+    static_hplh_file = fout;
+    hash_foreach(hash, &hash_fprint_helper);
+    static_hplh_file = NULL;
+    fprintf(fout,">\n");
+}
