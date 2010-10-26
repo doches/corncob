@@ -261,3 +261,4 @@ int double_hash_largest_key(double_hash *hash)
     double_hash_foreach(hash, &double_hash_largest_key_helper);
     return _static_double_hash_largest_key_helper_index;
 }
+

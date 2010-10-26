@@ -42,3 +42,4 @@ void progressbar_finish(progressbar *bar);
 void progressbar_draw(progressbar *bar,unsigned int time);
 
 #endif
+

@@ -48,7 +48,7 @@ int main(int argc, char **argv)
         strcpy(alg,strtok(NULL,"."));
         
         // TODO: parameterize this, somehow.
-        int interval = 500;
+        int interval = 2500;
         
         double threshold = 0.0;
         if (alg[strlen(alg)-3] == '_') {
