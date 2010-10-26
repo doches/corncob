@@ -357,9 +357,11 @@ void OCW_each_document(unsigned int target, unsigned int *words, unsigned int le
     if (class_distances->size > 0) {
         int best_key;
         double best_value;
+        unsigned int new_class;
         switch (static_ocw_model->update_method) {
             case NEAREST:
-                unsigned_array_set(static_ocw_model->assignments, index, unsigned_array_get(static_ocw_model->assignments, best_index));
+                new_class = unsigned_array_get(static_ocw_model->assignments, best_index);
+                unsigned_array_set(static_ocw_model->assignments, index, new_class);
                 break;
             case TOP:
                 unsigned_array_set(static_ocw_model->assignments, index, double_hash_largest_key(class_distances));
@@ -372,6 +374,8 @@ void OCW_each_document(unsigned int target, unsigned int *words, unsigned int le
                 }
                 break;
             default:
+                printf("Update method not recognized, freaking out.\n");
+                exit(1);
                 break;
         }
     }
