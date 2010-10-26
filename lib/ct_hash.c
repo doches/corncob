@@ -265,7 +265,9 @@ ct_hash *hash_load(const char *filename)
     FILE *fin = fopen(filename,"r");
     char line[80];
     while (!feof(fin)) {
-        fgets(line,80,fin);
+        if (fgets(line,80,fin) == NULL) {
+        	break;
+        }
         
         char key_s[10];
         strcpy(key_s,strtok(line,"\t"));
