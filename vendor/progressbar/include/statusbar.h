@@ -48,3 +48,4 @@ void statusbar_finish(statusbar *bar);
 void statusbar_draw(statusbar *bar);
 
 #endif
+

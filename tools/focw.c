@@ -48,7 +48,7 @@ int main(int argc, char **argv)
         strcpy(alg,strtok(NULL,"."));
         
         // TODO: parameterize this, somehow.
-        int interval = 500;
+        int interval = 2500;
         
         double threshold = 0.0;
         if (alg[strlen(alg)-3] == '_') {
@@ -171,8 +171,7 @@ OCW *OCW_resume(char *focw_filename, char *corpus_filename, int document_index, 
     FILE *fin = fopen(focw_filename,"r");
     char *line = (char *)malloc(sizeof(char)*80);
     while (!feof(fin)) {
-        fgets(line,80,fin);
-        if (strlen(line) <= 1 || strstr(line,"\t") == NULL) {
+        if (fgets(line,80,fin) == NULL || strlen(line) <= 1 || strstr(line,"\t") == NULL) {
             break;
         }
         char target_s[10];
@@ -213,9 +212,7 @@ OCW *OCW_resume(char *focw_filename, char *corpus_filename, int document_index, 
     line = (char *)malloc(sizeof(char)*line_length);
     int line_index = 0;
     while (!feof(fin)) {
-        fgets(line,line_length,fin);
-        
-        if (strchr(line,'(') == NULL) {
+        if (fgets(line,line_length,fin) == NULL || strchr(line,'(') == NULL) {
             break;
         }
         
