@@ -24,7 +24,6 @@ int main(int argc, char **argv)
     char rep_filename[80];
     sprintf(rep_filename,"%s.reps",argv[5]);
     nLDA_save_representations(model, rep_filename);
-	nLDA_free(model);
 	return 0;
 }
 
@@ -206,7 +205,7 @@ double nLDA_P_c(nLDA *model, unsigned int category)
 		ncd = count_list_get(model->ncds,category);
 	}
 	double numerator = ((SparseCounts_getValue(ncd,category)+model->alpha)*model->gamma);
-	double denominator = ncd->total + model->categories*model->alpha + model->gamma;
+	double denominator = ncd->total + model->categories*model->alpha;
 	return numerator / denominator;
 }
 
@@ -217,8 +216,8 @@ double nLDA_P_c_new(nLDA *model)
 		count_list_add(model->ncds);
 		ncd = count_list_get(model->ncds,model->document_index);
 	}
-	double numerator = model->gamma;
-	double denominator = ncd->total + model->categories*model->alpha + model->gamma;
+	double numerator = 1.0-model->gamma;
+	double denominator = ncd->total + model->categories*model->alpha;
 	return numerator / denominator;
 }
 
