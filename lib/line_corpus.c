@@ -54,7 +54,7 @@ void line_corpus_document_free(line_corpus_document *doc)
 
 /***** line_corpus *****/
 
-line_corpus *line_corpus_new(char *filename)
+line_corpus *line_corpus_new(const char *filename)
 {
 	line_corpus *new = (line_corpus *)malloc(sizeof(line_corpus));
 	new->documents = NULL;

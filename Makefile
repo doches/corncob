@@ -1,7 +1,7 @@
 # Makefile for lda-c and assorted tools (int->int hash, string->int hash, sparsecount, etc.)
 
 CC = gcc
-OPTIMIZATION_FLAGS = -O1
+OPTIMIZATION_FLAGS = -O2
 DEBUG_FLAGS = 
 
 UNAME := $(shell uname)
@@ -13,8 +13,8 @@ CFLAGS = -std=gnu99 -Wall -I lib/ -I vendor/include/ -I tools/ -Werror $(DEBUG_F
 endif
 
 LFLAGS = -lm -lgsl -lgslcblas $(DEBUG_FLAGS)
-EXECUTABLES = lda rmc wordcount ctools_test nlda nlda2 ocw gen_sv focw
-HEADERS = lib/corpus.h lib/ct_hash.h lib/SparseCounts.h lib/word_hash.h lib/WordMap.h tools/lda.h tools/rmc.h lib/count_list.h lib/context_corpus.h vendor/include/progressbar.h tools/nlda.h vendor/include/statusbar.h
+EXECUTABLES = lda rmc wordcount ctools_test nlda nlda2 ocw gen_sv focw ntm
+HEADERS = lib/corpus.h lib/ct_hash.h lib/SparseCounts.h lib/word_hash.h lib/WordMap.h tools/lda.h tools/rmc.h lib/count_list.h lib/context_corpus.h vendor/include/progressbar.h tools/nlda.h vendor/include/statusbar.h tools/ntm.h
 
 TEST := ${wildcard test/*.c}
 TEST_OBJ := ${foreach src,${TEST},${subst .c,.o, ${lastword ${subst /, ,${src}}}}}
@@ -172,6 +172,14 @@ double_hash.o: lib/double_hash.h lib/double_hash.c
 	
 ct_hash_print.o: lib/ct_hash_print.h lib/ct_hash_print.c
 	$(CC) -c $(CFLAGS) lib/ct_hash_print.c
+
+# nTM target
+NTM_DEP = line_corpus.o WordMap.o progressbar.o statusbar.o ntm.o word_hash.o ct_hash.o ct_hash_print.o SparseCounts.o count_list.o unsigned_array.o
+ntm: $(NTM_DEP)
+	$(CC) $(LFLAGS) $(NTM_DEP) -o ntm
+	
+ntm.o: tools/ntm.h tools/ntm.c
+	$(CC) -c $(CFLAGS) tools/ntm.c
 
 .PHONY: clean doc all
 

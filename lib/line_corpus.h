@@ -33,7 +33,7 @@ typedef struct line_corpus_t
 	WordMap *wordmap;
 } line_corpus;
 
-line_corpus *line_corpus_new(char *filename);
+line_corpus *line_corpus_new(const char *filename);
 void line_corpus_each_document(line_corpus *corpus, void (*document_callback)(unsigned int *,unsigned int));
 void line_corpus_free(line_corpus *corpus);
 
