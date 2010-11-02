@@ -96,8 +96,6 @@ void nTM_each_document(WordIndex *words, unsigned int length)
         progressbar_finish(_static_progressbar);
         
         nTM_save_assignments(_static_nTM);
-        if (_static_nTM->documents > 200)
-            exit(0);
         
         _static_progressbar = progressbar_new("Training", _static_nTM->interval);
     }
