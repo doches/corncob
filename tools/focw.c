@@ -48,12 +48,17 @@ int main(int argc, char **argv)
         strcpy(alg,strtok(NULL,"."));
         
         // TODO: parameterize this, somehow.
-        int interval = 2500;
+        int interval = 10000;
         
         double threshold = 0.0;
         if (alg[strlen(alg)-3] == '_') {
             char threshold_s[10];
             strcpy(threshold_s,alg+5);
+            for(int i=0;i<strlen(threshold_s);i++) {
+            	if (threshold_s[i] == '_') {
+            		threshold_s[i] = '.';
+            	}
+            }
             threshold = atof(threshold_s);
             alg[4] = '\0';
         }
@@ -66,6 +71,8 @@ int main(int argc, char **argv)
         } else if (!strcmp(alg,"vote")) {
             method = VOTE;
         }
+        
+        printf("Resuming:\n\t%s %s %d %s %f %d\n",focw_filename,corpus,document_index,alg,threshold,interval);
         
         model = OCW_resume(focw_filename,corpus,document_index,method,threshold,interval);
     } else {

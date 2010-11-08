@@ -98,6 +98,7 @@ class World
 		
 		Instance.input = input
 		begin
+			`mkdir #{Instance.input.split('/').pop}.results`
 			report = `head -n 5 #{Instance.input.split('/').pop}.results/report`.split("\n").reject { |l| not l =~ /<([^>]+)>/ }.pop
 			report =~ /<([^>]+)>/
 			params = $1.split(" ").map { |x| x.to_f }
