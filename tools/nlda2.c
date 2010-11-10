@@ -2,35 +2,35 @@
 #include <time.h>
 #include <stdlib.h>
 
-unsigned int reassess_window = 0;
 int main(int argc, char **argv)
 {
 	if(argc < 6) {
-		printf("nlda2 expects 5-6 arguments, received %d\n",argc-1);
-		printf("\nUsage: nlda2 [alpha] [beta] [gamma] [corpusfile] [outfile] <reassess_window>\n");
+		printf("nlda2 expects 4 arguments, received %d\n",argc-1);
+		printf("\nUsage: nlda2 [alpha] [beta] [gamma] [corpusfile] [output dir]\n");
 		return 1;
 	}
 	double alpha = atof(argv[1]);
 	double beta = atof(argv[2]);
 	double gamma = atof(argv[3]);
-	reassess_window = 10;
-	if(argc == 7) {
-		reassess_window = atoi(argv[6]);
-	}
 	srandom(time(NULL));
-	nLDA *model = nLDA_new(alpha,beta,gamma,argv[4]);
+	nLDA *model = nLDA_new(alpha,beta,gamma,argv[4],argv[5]);
 	nLDA_train(model);
-	nLDA_dump(model,argv[5]);
-    char rep_filename[80];
-    sprintf(rep_filename,"%s.reps",argv[5]);
-    nLDA_save_representations(model, rep_filename);
+    nLDA_dump(model);
 	return 0;
 }
 
-nLDA *nLDA_new(double alpha, double beta, double gamma, char *filename)
+nLDA *nLDA_new(double alpha, double beta, double gamma, char *filename, char *output_dir)
 {
 	nLDA *new = (nLDA *)malloc(sizeof(nLDA));
-	new->corpus = line_corpus_new(filename);
+    if (filename[strlen(filename)-1] == '/') {
+        filename[strlen(filename)-1] = '\0';
+    }
+	new->corpus = document_corpus_new(filename);
+    new->corpus_filename = filename;
+    if (output_dir[strlen(output_dir)-1] == '/') {
+        output_dir[strlen(output_dir)-1] = '\0';
+    }
+    new->output_dir = output_dir;
 	new->categories = 0;
 	new->instances = NULL;
 	new->document_index = 0;
@@ -39,6 +39,8 @@ nLDA *nLDA_new(double alpha, double beta, double gamma, char *filename)
 	new->gamma = gamma;
 	new->ncds = count_list_new();
 	new->nwcs = count_list_new();
+    new->unique_words = hash_new(1000);
+    new->word_count = 0;
 	return new;
 }
 
@@ -49,9 +51,16 @@ progressbar *progress = NULL;
 void nLDA_train_each_document(unsigned int *words, unsigned int length)
 {
 	count_list_add(static_model->ncds);
+    progressbar *document_progress = progressbar_new("Document", length);
 	for(int i=0;i<length;i++) {
-		nLDA_reassess(static_model);
-		
+        // Update list of unique words (W)
+        hash_element *unique_element = hash_get(static_model->unique_words, words[i]);
+        if (unique_element == NULL) {
+            hash_add(static_model->unique_words, words[i], 1);
+            static_model->word_count++;
+        }
+        
+        // Assign a category to this word/document instance
 		Instance *instance = Instance_new(words[i],0,static_model->document_index,static_instance_index++,NULL);
 		nLDA_assign_category(static_model,instance);
 		if(static_model->instances == NULL) {
@@ -60,30 +69,20 @@ void nLDA_train_each_document(unsigned int *words, unsigned int length)
 			static_instance_last->next = instance;
 		}
 		static_instance_last = instance;
+        progressbar_inc(document_progress);
 	}
 	static_model->document_index++;
 	progressbar_inc(progress);
+    progressbar_finish(document_progress);
+    nLDA_dump(static_model);
 }
 
-void nLDA_save_representations(nLDA *model, char *filename)
+void nLDA_dump(nLDA *model)
 {
-    Instance *instance = Instance_new(0,0,0,0,NULL);
-	FILE *fout = fopen(filename,"w");
-	for(int w=0;w<model->corpus->wordmap->size;w++) {
-        fprintf(fout,"%d",w);
-		instance->w_i = w;
-		for(int i=0;i<model->categories;i++) {
-			double temp_p = nLDA_P_w_c(model,instance,i);
-			fprintf(fout," %f",temp_p);
-		}
-        fprintf(fout,"\n");
-	}
+    char filename[120];
+    sprintf(filename,"%s/%s.%d.%fa.%fb.%fg.focw",model->output_dir,model->corpus_filename,model->document_index,model->alpha,model->beta,model->gamma);
+    printf("Saving categorization %s\n",filename);
     
-    fclose(fout);
-}
-
-void nLDA_dump(nLDA *model, char *filename)
-{
 	Instance *instance = Instance_new(0,0,0,0,NULL);
 	FILE *fout = fopen(filename,"w");
 	for(int w=0;w<model->corpus->wordmap->size;w++) {
@@ -113,58 +112,38 @@ unsigned int nLDA_new_category(nLDA *model)
 	return model->categories++;
 }
 
-unsigned int reassess_count = 0;
-Instance *reassess_start = NULL;
-void nLDA_reassess(nLDA *model)
-{
-	Instance *instance = model->instances;
-	if (reassess_start != NULL) {
-		instance = reassess_start;
-		reassess_start = reassess_start->next;
-	}
-	reassess_count = 0;
-	while(instance != NULL) {
-		SparseCounts *ncd = count_list_get(model->ncds,instance->d_i);
-		SparseCounts *nwc = count_list_get(model->nwcs,instance->z_i);
-		SparseCounts_add(ncd,instance->z_i,-1);
-		SparseCounts_add(nwc,instance->w_i,-1);
-		model->document_index = instance->d_i;
-		unsigned int old_z = instance->z_i;
-		nLDA_assign_category(model,instance);
-		if(old_z != instance->z_i) {
-			nwc = count_list_get(model->nwcs,instance->z_i);
-		}
-		SparseCounts_add(ncd,instance->z_i,1);
-		SparseCounts_add(nwc,instance->w_i,1);
-	
-		instance = instance->next;
-		reassess_count++;
-	}
-
-	if(reassess_count >= reassess_window && reassess_start == NULL) {
-		reassess_start = model->instances;
-	}
-}
-
+double static_all_z_in_d;
 void nLDA_assign_category(nLDA *model, Instance *instance)
 {
 	if(model->categories == 0) {
+        // If this is the first word (e.g. if we don't yet have _any_ categories) 
+        // create a new category, assign it to this instance, and return.
 		instance->z_i = nLDA_new_category(model);
 		SparseCounts_add(count_list_get(model->nwcs,instance->z_i),instance->w_i,1);
 		SparseCounts_add(count_list_get(model->ncds,instance->d_i),instance->z_i,1);
 		return;
 	}
 	
+    // Compute the probability of each existing category given this word
+    static_all_z_in_d = 0.0f;
+    SparseCounts *ncd = count_list_get(model->ncds, instance->d_i);
+    for (int cat_iter = 0; cat_iter < model->categories; cat_iter++) {
+        static_all_z_in_d += (SparseCounts_getValue(ncd, cat_iter) + model->alpha + model->word_count * model->beta) * (1-model->gamma);
+    }
+    static_all_z_in_d += (model->alpha + model->word_count * model->beta) * model->gamma;
+    
 	double *probabilities = (double *)malloc(sizeof(double)*(model->categories+1));
 	double total = 0.0;
 	for(unsigned int i=0;i<model->categories;i++) {
-		probabilities[i] = nLDA_P_w_c(model,instance,i) * nLDA_P_c(model,i);
+		probabilities[i] = nLDA_P_w_c(model,instance,i) * nLDA_P_c_d(model,instance,i);
 		total += probabilities[i];
 	}
-	probabilities[model->categories] = nLDA_P_w_c_new(model,instance) * nLDA_P_c_new(model);
+    // Include the probability that this word came from a new category
+	probabilities[model->categories] = nLDA_P_w_cnew(model,instance) * nLDA_P_cnew_d(model,instance);
 	total += probabilities[model->categories];
+    
+    // Sample a random category based on the just-computed probabilities
 	double sample = ((random()%1000)/(1000.0)) * total;
-	
 	for(unsigned int i=0;i<model->categories;i++) {
 		sample -= probabilities[i];
 		if(sample <= 0.0f) {
@@ -176,49 +155,47 @@ void nLDA_assign_category(nLDA *model, Instance *instance)
 			return;
 		}
 	}
+    
     // If we got here, we should create a new category...
 	instance->z_i = nLDA_new_category(model);
 	SparseCounts_add(count_list_get(model->nwcs,instance->z_i),instance->w_i,1);
 	SparseCounts_add(count_list_get(model->ncds,instance->d_i),instance->z_i,1);
+    
+    free(probabilities);
 }
 
-double nLDA_P_w_c(nLDA *model, Instance *instance, unsigned int c)
+double nLDA_P_w_c(nLDA *model, Instance *instance, unsigned int category)
 {
-	SparseCounts *nwc = count_list_get(model->nwcs,c);
-	double numerator = (SparseCounts_getValue(nwc,instance->w_i) + model->beta);
-	double denominator = (nwc->total + model->corpus->wordmap->size * model->beta);	
-	return numerator / denominator;
+    SparseCounts *nwc = count_list_get(model->nwcs, category);
+    double numerator = SparseCounts_getValue(nwc, instance->w_i) + model->beta;
+    double denominator = (nwc->total + model->word_count * model->beta);
+    
+    return numerator / denominator;
 }
 
-double nLDA_P_w_c_new(nLDA *model, Instance *instance)
+double nLDA_P_c_d(nLDA *model, Instance *instance, unsigned int category)
 {
-	double numerator = (model->beta);
-	double denominator = (model->corpus->wordmap->size * model->beta);
-	return numerator / denominator;
+    SparseCounts *ncd = count_list_get(model->ncds, instance->d_i);
+    double numerator = (SparseCounts_getValue(ncd, category) + model->alpha + model->word_count * model->beta) * (1-model->gamma);
+    double denominator = static_all_z_in_d;
+    
+    return numerator / denominator;
 }
 
-double nLDA_P_c(nLDA *model, unsigned int category)
+double nLDA_P_w_cnew(nLDA *model, Instance *instance)
 {
-	SparseCounts *ncd = count_list_get(model->ncds,model->document_index);
-	while(ncd == NULL) {
-		count_list_add(model->ncds);
-		ncd = count_list_get(model->ncds,category);
-	}
-	double numerator = ((SparseCounts_getValue(ncd,category)+model->alpha)*model->gamma);
-	double denominator = ncd->total + model->categories*model->alpha;
-	return numerator / denominator;
+    double numerator = model->beta;
+    double denominator = model->word_count * model->beta;
+    
+    return numerator / denominator;
 }
 
-double nLDA_P_c_new(nLDA *model)
+double nLDA_P_cnew_d(nLDA *model, Instance *instance)
 {
-	SparseCounts *ncd = count_list_get(model->ncds,model->document_index);
-	while(ncd == NULL) {
-		count_list_add(model->ncds);
-		ncd = count_list_get(model->ncds,model->document_index);
-	}
-	double numerator = 1.0-model->gamma;
-	double denominator = ncd->total + model->categories*model->alpha;
-	return numerator / denominator;
+    double numerator = (model->alpha + model->word_count * model->beta) * model->gamma;
+    double denominator = static_all_z_in_d;
+    
+    return numerator / denominator;
 }
 
 void nLDA_train(nLDA *model)
@@ -227,7 +204,7 @@ void nLDA_train(nLDA *model)
 	static_instance_index = 0;
 	
 	progress = progressbar_new("Training",model->corpus->document_count);
-	line_corpus_each_document(model->corpus, &nLDA_train_each_document);
+	document_corpus_each_document(model->corpus, &nLDA_train_each_document);
 	progressbar_finish(progress);
 	
 	static_instance_index = -1;
@@ -236,7 +213,6 @@ void nLDA_train(nLDA *model)
 
 void nLDA_free(nLDA *model)
 {
-	line_corpus_free(model->corpus);
 	Instance_free(model->instances);
 	free(model);
 }

@@ -14,7 +14,7 @@ endif
 
 LFLAGS = -lm -lgsl -lgslcblas $(DEBUG_FLAGS)
 EXECUTABLES = lda rmc wordcount ctools_test nlda nlda2 ocw gen_sv focw ntm
-HEADERS = lib/corpus.h lib/ct_hash.h lib/SparseCounts.h lib/word_hash.h lib/WordMap.h tools/lda.h tools/rmc.h lib/count_list.h lib/context_corpus.h vendor/include/progressbar.h tools/nlda.h vendor/include/statusbar.h tools/ntm.h
+HEADERS = lib/corpus.h lib/ct_hash.h lib/SparseCounts.h lib/word_hash.h lib/WordMap.h tools/lda.h tools/rmc.h lib/count_list.h lib/context_corpus.h vendor/include/progressbar.h tools/nlda.h vendor/include/statusbar.h tools/ntm.h lib/document_corpus.h
 
 TEST := ${wildcard test/*.c}
 TEST_OBJ := ${foreach src,${TEST},${subst .c,.o, ${lastword ${subst /, ,${src}}}}}
@@ -126,14 +126,15 @@ nlda: context_corpus.o progressbar.o nlda.o WordMap.o SparseCounts.o ct_hash.o w
 	$(CC) $(LFLAGS) $(CFLAGS) WordMap.o SparseCounts.o word_hash.o ct_hash.o Instance.o count_list.o context_corpus.o progressbar.o nlda.o -o nlda
 
 # nLDA2 target
+NLDA2_DEPS = document_corpus.o progressbar.o WordMap.o SparseCounts.o ct_hash.o word_hash.o Instance.o nlda2.o count_list.o
+nlda2: $(NLDA2_DEPS)
+	$(CC) $(LFLAGS) $(CFLAGS) $(NLDA2_DEPS) -o nlda2
+
 line_corpus.o: lib/line_corpus.h lib/line_corpus.c statusbar.o
 	$(CC) -c $(CFLAGS) lib/line_corpus.c
 
 nlda2.o: tools/nlda2.h tools/nlda2.c
 	$(CC) -c $(CFLAGS) tools/nlda2.c
-
-nlda2: line_corpus.o progressbar.o WordMap.o SparseCounts.o ct_hash.o word_hash.o Instance.o nlda2.o count_list.o statusbar.o
-	$(CC) $(LFLAGS) $(CFLAGS) line_corpus.o progressbar.o WordMap.o SparseCounts.o ct_hash.o word_hash.o Instance.o nlda2.o count_list.o statusbar.o -o nlda2
 	
 gen_sv: gen_sv.o line_corpus.o progressbar.o WordMap.o SparseCounts.o ct_hash.o word_hash.o count_list.o statusbar.o
 	$(CC) $(LFLAGS) $(CFLAGS) gen_sv.o line_corpus.o progressbar.o WordMap.o SparseCounts.o ct_hash.o word_hash.o count_list.o statusbar.o -o gen_sv
@@ -155,6 +156,9 @@ unsigned_array.o: lib/unsigned_array.c lib/unsigned_array.h
 
 cosine.o: lib/cosine.c lib/cosine.h
 	$(CC) -c $(CFLAGS) lib/cosine.c
+	
+document_corpus.o: lib/document_corpus.c lib/document_corpus.h
+	$(CC) -c $(CFLAGS) lib/document_corpus.c
 	
 # FoCW target
 FOCW_DEP = target_corpus.o WordMap.o progressbar.o statusbar.o focw.o unsigned_array.o word_hash.o LSH.o ct_hash.o double_hash.o ct_hash_print.o double_matrix.o
