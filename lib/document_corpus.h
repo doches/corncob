@@ -38,5 +38,6 @@ typedef struct _document_corpus_t
 
 document_corpus *document_corpus_new(char *directory);
 void document_corpus_each_document(document_corpus *corpus, void (*document_callback)(unsigned int *,unsigned int));
+void document_corpus_scan_directory(document_corpus *corpus, char *directory);
 
 #endif

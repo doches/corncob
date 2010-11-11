@@ -15,8 +15,10 @@
 document_corpus_document *document_corpus_document_new(char *directory, char *filename)
 {
     document_corpus_document *new = (document_corpus_document *)malloc(sizeof(document_corpus_document));
-    new->filename = (char *)malloc(sizeof(char)*strlen(filename));
-    strcpy(new->filename,filename);
+    new->filename = (char *)malloc(sizeof(char)*(strlen(directory)+2+strlen(filename)));
+    strcpy(new->filename,directory);
+    strcat(new->filename,"/");
+    strcat(new->filename,filename);
     new->next = NULL;
     return new;
 }
@@ -30,34 +32,49 @@ document_corpus *document_corpus_new(char *directory)
     new->document_count = 0;
     strcpy(new->filename,directory);
     
+    document_corpus_scan_directory(new,directory);
+    
+    return new;
+}
+
+void document_corpus_scan_directory(document_corpus *corpus, char *directory)
+{
     DIR *dir_handle;
     struct dirent *dir_entry;
     
     dir_handle = opendir(directory);
     if (dir_handle != NULL) {
         while ((dir_entry = readdir(dir_handle))) {
-            document_corpus_document *document = document_corpus_document_new(directory, dir_entry->d_name);
-            document->next = new->documents;
-            new->documents = document;
-            new->document_count++;
+            char subfile[120];
+            strcpy(subfile,directory);
+            strcat(subfile,"/");
+            strcat(subfile,dir_entry->d_name);
+            DIR *subdir = opendir(subfile);
+            if (subdir != NULL) {
+                closedir(subdir);
+                if (dir_entry->d_name[0] != '.') {
+                    document_corpus_scan_directory(corpus,subfile);
+                }
+            } else {
+                document_corpus_document *document = document_corpus_document_new(directory, dir_entry->d_name);
+//                printf("%s/%s\n",directory,dir_entry->d_name);
+                document->next = corpus->documents;
+                corpus->documents = document;
+                corpus->document_count++;
+            }
         }
         closedir(dir_handle);
     } else {
         fprintf(stderr,"[document_corpus]: Failed to open directory '%s'\n",directory);
-        exit(1);
     }
-    
-    return new;
 }
 
 void document_corpus_each_document(document_corpus *corpus, void (*document_callback)(unsigned int *,unsigned int))
 {
     document_corpus_document *current_document = corpus->documents;
     while (current_document != NULL) {
-        char filename[160];
-        strcpy(filename,corpus->filename);
-        strcat(filename,"/");
-        strcat(filename,current_document->filename);
+        char *filename = current_document->filename;
+        filename[strlen(corpus->filename)+1+strlen(current_document->filename)] = '\0';
         FILE *fin = fopen(filename,"r");
         char line[READLINE_LENGTH];
         

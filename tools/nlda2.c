@@ -5,7 +5,7 @@
 int main(int argc, char **argv)
 {
 	if(argc < 6) {
-		printf("nlda2 expects 4 arguments, received %d\n",argc-1);
+		printf("nlda2 expects 5 arguments, received %d\n",argc-1);
 		printf("\nUsage: nlda2 [alpha] [beta] [gamma] [corpusfile] [output dir]\n");
 		return 1;
 	}
@@ -74,7 +74,9 @@ void nLDA_train_each_document(unsigned int *words, unsigned int length)
 	static_model->document_index++;
 	progressbar_inc(progress);
     progressbar_finish(document_progress);
-    nLDA_dump(static_model);
+    if (static_model->document_index % 10 == 0) {
+        nLDA_dump(static_model);
+    }
 }
 
 void nLDA_dump(nLDA *model)
