@@ -27,7 +27,7 @@ hash_element *SparseCounts_getElement(SparseCounts *counts, int key)
   return element;
 }
 
-// Returns -1 if key is not found!
+// Returns 0 if key is not found!
 unsigned int SparseCounts_getValue(SparseCounts *counts, int key)
 {
   hash_element *element = SparseCounts_getElement(counts,key);
