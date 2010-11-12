@@ -6,7 +6,7 @@
 input = ARGV.shift
 output = ARGV.shift
 pattern = ARGV.empty? ? false : ARGV.shift
-STDERR.puts "Rendering #{File.join(input,pattern)} into #{output}"
+STDERR.puts "Rendering #{File.join(input,pattern || '*')} into #{output}"
 pattern = /#{pattern}/ if pattern
 `mkdir #{output}` if not File.exists?(output)
 Dir.foreach(input) do |file|
