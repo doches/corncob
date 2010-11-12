@@ -147,6 +147,10 @@ OCW *OCW_new(char *filename, algorithm alg, double threshold, int interval)
     model->f_xx = 0;
     model->context_counts = hash_new(2000);
     
+    for (int i=0; i<1000; i++) {
+        model->cached_ppmi[i] = NULL;
+    }
+    
     return model;
 }
 
@@ -173,6 +177,10 @@ OCW *OCW_resume(char *focw_filename, char *corpus_filename, int document_index, 
     model->distances = double_matrix_new(500, 500, 0.0);
     model->f_xx = 0;
     model->context_counts = hash_new(2000);
+    
+    for (int i=0; i<1000; i++) {
+        model->cached_ppmi[i] = NULL;
+    }
     
     // Load targets, categories, and assignments
     FILE *fin = fopen(focw_filename,"r");
@@ -328,7 +336,8 @@ void OCW_each_document(unsigned int target, unsigned int *words, unsigned int le
     }
     
     // Compute PPMI vector for this target
-    double_hash *target_ppmi = OCW_ppmi(static_ocw_model,index);
+    static_ocw_model->cached_ppmi[index] = OCW_ppmi(static_ocw_model,index);
+    double_hash *target_ppmi = static_ocw_model->cached_ppmi[index];
     
     // Update distance matrix
     for (int i=0; i<static_ocw_model->num_targets; i++) {

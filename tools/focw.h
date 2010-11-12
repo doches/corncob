@@ -60,6 +60,9 @@ typedef struct OCW_t
     
     // Map WordMap values -> target indices
     ct_hash *wordmap_to_target;
+    
+    // Cache PPMI vectors
+    double_hash *cached_ppmi[1000];
 } OCW;
 
 OCW *OCW_new(char *filename, algorithm alg, double threshold, int interval);
