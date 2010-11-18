@@ -8,7 +8,7 @@
  */
  
 //#define DEBUG
-#define PPMI
+//#define PPMI
 
 #include "focw.h"
 #include <stdlib.h>
@@ -341,6 +341,7 @@ void OCW_each_document(unsigned int target, unsigned int *words, unsigned int le
     }
     static_ocw_model->cached_ppmi[index] = OCW_ppmi(static_ocw_model,index);
     double_hash *target_ppmi = static_ocw_model->cached_ppmi[index];
+//    ct_hash *target_rep = static_ocw_model->targets[index];
     
     // Update distance matrix
     for (int i=0; i<static_ocw_model->num_targets; i++) {
@@ -352,13 +353,15 @@ void OCW_each_document(unsigned int target, unsigned int *words, unsigned int le
             }
 
             double distance = double_hash_cosine(target_ppmi,other_ppmi);
+//            ct_hash *other_rep = static_ocw_model->targets[i];
+//            double distance = hash_cosine(target_rep, other_rep);
             double_matrix_set(static_ocw_model->distances, index, i, distance);
-            double_matrix_set(static_ocw_model->distances, i, index, distance);
+//            double_matrix_set(static_ocw_model->distances, i, index, distance);
         }
     }
     
     // Find highest ranked category in neighboorhood
-    double_hash *class_distances = double_hash_new(static_ocw_model->num_categories/3);
+    double_hash *class_distances = double_hash_new(50);
     int best_index = index;
     double best_distance = 0.0;
     for (int i=0; i<static_ocw_model->num_targets; i++) {

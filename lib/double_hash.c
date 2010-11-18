@@ -111,6 +111,16 @@ void double_hash_foreach(double_hash *map,void (*callback)(double_hash_element *
 	}
 }
 
+int bucket_length(double_hash_element *head)
+{
+    int len = 0;
+    while (head != NULL) {
+        head = head->next;
+        len++;
+    }
+    return len;
+}
+
 // Get a value out of a hashmap
 double_hash_element *double_hash_get(double_hash *map, int key)
 {
@@ -176,12 +186,37 @@ double double_hash_magnitude(double_hash *a)
     return sqrt(double_hash_dot(a,a));
 }
 
+//double double_hash_cosine(double_hash *a, double_hash *b)
+//{
+//    if (a->size > b->size) {
+//        return double_hash_cosine(b,a);
+//    }
+//    return double_hash_dot(a,b) / (double_hash_magnitude(a) * double_hash_magnitude(b));
+//}
+
 double double_hash_cosine(double_hash *a, double_hash *b)
 {
-    if (a->size < b->size) {
+    if (a->size > b->size) {
         return double_hash_cosine(b,a);
     }
-    return double_hash_dot(a,b) / (double_hash_magnitude(a) * double_hash_magnitude(b));
+    
+    double a_dot_b = 0.0f;
+    double a_dot_a = 0.0f;
+    
+    for (int i=0; i<a->num_buckets; i++) {
+        double_hash_element *head = a->buckets[i];
+        while (head != NULL) {
+            a_dot_a += head->value * head->value;
+            
+            double_hash_element *other = double_hash_get(b, head->key);
+            if (other != NULL) {
+                a_dot_b += head->value * other->value;
+            }
+            head = head->next;
+        }
+    }
+    
+    return a_dot_b / (sqrt(a_dot_a) * double_hash_magnitude(b));
 }
 
 void double_hash_print_helper(double_hash_element *element)
