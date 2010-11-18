@@ -336,15 +336,22 @@ void OCW_each_document(unsigned int target, unsigned int *words, unsigned int le
     }
     
     // Compute PPMI vector for this target
+    if (static_ocw_model->cached_ppmi[index] != NULL) {
+        double_hash_free(static_ocw_model->cached_ppmi[index]);
+    }
     static_ocw_model->cached_ppmi[index] = OCW_ppmi(static_ocw_model,index);
     double_hash *target_ppmi = static_ocw_model->cached_ppmi[index];
     
     // Update distance matrix
     for (int i=0; i<static_ocw_model->num_targets; i++) {
         if (i != index) { // Don't compute distance between target and itself
-            double_hash *other_ppmi = OCW_ppmi(static_ocw_model, i);
+            double_hash *other_ppmi = static_ocw_model->cached_ppmi[i];
+            if (other_ppmi == NULL) {
+                static_ocw_model->cached_ppmi[i] = OCW_ppmi(static_ocw_model, i);
+                other_ppmi = other_ppmi;
+            }
+
             double distance = double_hash_cosine(target_ppmi,other_ppmi);
-            double_hash_free(other_ppmi);
             double_matrix_set(static_ocw_model->distances, index, i, distance);
             double_matrix_set(static_ocw_model->distances, i, index, distance);
         }
@@ -396,8 +403,6 @@ void OCW_each_document(unsigned int target, unsigned int *words, unsigned int le
         }
     }
     double_hash_free(class_distances);
-    
-    double_hash_free(target_ppmi);
     
     if (static_ocw_model->output_every_index > 0 && static_ocw_model->document_index % static_ocw_model->output_every_index == 0 && static_ocw_model->document_index != 0) {
         progressbar_finish(static_progress);
