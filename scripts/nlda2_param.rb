@@ -1,3 +1,4 @@
+# OLD NLDA2
 # Do genetic algorithms exploration of parameter space for nlda2
 
 class Instance
