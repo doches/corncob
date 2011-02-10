@@ -440,6 +440,7 @@ double_hash *OCW_update_ppmi_cache(OCW *model, int index)
         }
         free(model->cached_ppmi);
         model->cached_ppmi = new_ppmi;
+        model->max_ppmi = new_max_ppmi;
     }
     
     // Compute PPMI vector for this target
