@@ -8,7 +8,7 @@
  */
  
 //#define DEBUG
-//#define PPMI
+#define PPMI
 
 #include "focw.h"
 #include <stdlib.h>
@@ -133,12 +133,12 @@ OCW *OCW_new(char *filename, algorithm alg, double threshold, int interval)
     model->num_targets = 0;
     model->max_targets = 2000;
     model->num_categories = 0;
-    model->assignments = unsigned_array_new(2000);
+    model->assignments = unsigned_array_new(model->max_targets);
     model->targets = (ct_hash **)malloc(sizeof(ct_hash *)*model->max_targets);
     for (int i=0; i<model->max_targets; i++) {
         model->targets[i] = NULL;
     }
-    model->wordmap_to_target = hash_new(2000);
+    model->wordmap_to_target = hash_new(model->max_targets);
     
     // Distances
     model->distances = double_matrix_new(500, 500, 0.0);
@@ -147,7 +147,9 @@ OCW *OCW_new(char *filename, algorithm alg, double threshold, int interval)
     model->f_xx = 0;
     model->context_counts = hash_new(2000);
     
-    for (int i=0; i<1000; i++) {
+    model->max_ppmi = 1024;
+    model->cached_ppmi = (double_hash **)malloc(sizeof(double_hash *)*model->max_ppmi);
+    for (int i=0; i<model->max_ppmi; i++) {
         model->cached_ppmi[i] = NULL;
     }
     
@@ -167,7 +169,7 @@ OCW *OCW_resume(char *focw_filename, char *corpus_filename, int document_index, 
     model->document_index = 0;
     model->skip_documents = document_index;
     model->max_targets = 2000;
-    model->assignments = unsigned_array_new(2000);
+    model->assignments = unsigned_array_new(model->max_targets);
     model->targets = (ct_hash **)malloc(sizeof(ct_hash *)*model->max_targets);
     for (int i=0; i<model->max_targets; i++) {
         model->targets[i] = NULL;
@@ -178,7 +180,9 @@ OCW *OCW_resume(char *focw_filename, char *corpus_filename, int document_index, 
     model->f_xx = 0;
     model->context_counts = hash_new(2000);
     
-    for (int i=0; i<1000; i++) {
+    model->max_ppmi = 1024;
+    model->cached_ppmi = (double_hash **)malloc(sizeof(double_hash *)*model->max_ppmi);
+    for (int i=0; i<model->max_ppmi; i++) {
         model->cached_ppmi[i] = NULL;
     }
     
@@ -323,6 +327,20 @@ void OCW_each_document(unsigned int target, unsigned int *words, unsigned int le
         hash_add(static_ocw_model->wordmap_to_target, target, index);
         unsigned_array_set(static_ocw_model->assignments, index, category);
         static_ocw_model->targets[index] = hash_new(32);
+        
+        // If we're about to overflow the targets list, double it and copy over the old objects.
+        if (index >= static_ocw_model->max_targets) {
+            
+            int new_max_targets = static_ocw_model->max_targets*2;
+            ct_hash **new_targets = (ct_hash **)malloc(sizeof(ct_hash *)*new_max_targets);
+            
+            for (int i=0; i<static_ocw_model->max_targets; i++) {
+                new_targets[i] = static_ocw_model->targets[i];
+            }
+            free(static_ocw_model->targets);
+            static_ocw_model->targets = new_targets;
+            static_ocw_model->max_targets = new_max_targets;
+        }
     }
     
     // Update the frequency counts for this target
@@ -335,28 +353,19 @@ void OCW_each_document(unsigned int target, unsigned int *words, unsigned int le
         hash_update(static_ocw_model->context_counts, words[i], 1);
     }
     
-    // Compute PPMI vector for this target
-    if (static_ocw_model->cached_ppmi[index] != NULL) {
-        double_hash_free(static_ocw_model->cached_ppmi[index]);
-    }
-    static_ocw_model->cached_ppmi[index] = OCW_ppmi(static_ocw_model,index);
-    double_hash *target_ppmi = static_ocw_model->cached_ppmi[index];
-//    ct_hash *target_rep = static_ocw_model->targets[index];
+    double_hash *target_ppmi = OCW_update_ppmi_cache(static_ocw_model,index);
     
     // Update distance matrix
     for (int i=0; i<static_ocw_model->num_targets; i++) {
         if (i != index) { // Don't compute distance between target and itself
             double_hash *other_ppmi = static_ocw_model->cached_ppmi[i];
-            if (other_ppmi == NULL) {
-                static_ocw_model->cached_ppmi[i] = OCW_ppmi(static_ocw_model, i);
-                other_ppmi = other_ppmi;
+            if (other_ppmi == NULL || rand()%4 == 0) {
+                other_ppmi = OCW_update_ppmi_cache(static_ocw_model, i);
             }
 
             double distance = double_hash_cosine(target_ppmi,other_ppmi);
-//            ct_hash *other_rep = static_ocw_model->targets[i];
-//            double distance = hash_cosine(target_rep, other_rep);
             double_matrix_set(static_ocw_model->distances, index, i, distance);
-//            double_matrix_set(static_ocw_model->distances, i, index, distance);
+            double_matrix_set(static_ocw_model->distances, i, index, distance);
         }
     }
     
@@ -416,6 +425,29 @@ void OCW_each_document(unsigned int target, unsigned int *words, unsigned int le
     }
     progressbar_inc(static_progress);
     static_ocw_model->document_index++;
+}
+
+double_hash *OCW_update_ppmi_cache(OCW *model, int index)
+{
+    while (index > model->max_ppmi) {
+        int new_max_ppmi = model->max_ppmi*2;
+        double_hash **new_ppmi = (double_hash **)malloc(sizeof(double_hash *)*new_max_ppmi);
+        for (int i=0; i<model->max_ppmi; i++) {
+            new_ppmi[i] = model->cached_ppmi[i];
+        }
+        for (int i=model->max_ppmi; i<new_max_ppmi; i++) {
+            new_ppmi[i] = NULL;
+        }
+        free(model->cached_ppmi);
+        model->cached_ppmi = new_ppmi;
+    }
+    
+    // Compute PPMI vector for this target
+    if (static_ocw_model->cached_ppmi[index] != NULL) {
+        double_hash_free(static_ocw_model->cached_ppmi[index]);
+    }
+    static_ocw_model->cached_ppmi[index] = OCW_ppmi(static_ocw_model,index);
+    return static_ocw_model->cached_ppmi[index];
 }
 
 void OCW_train(OCW *model)

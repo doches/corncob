@@ -2,7 +2,7 @@
 
 CC = gcc
 OPTIMIZATION_FLAGS = -O2
-DEBUG_FLAGS =
+DEBUG_FLAGS = 
 
 UNAME := $(shell uname)
 ifeq ($(UNAME),Linux)
@@ -13,8 +13,8 @@ CFLAGS = -std=gnu99 -Wall -I lib/ -I vendor/include/ -I tools/ -Werror $(DEBUG_F
 endif
 
 LFLAGS = -lm -lgsl -lgslcblas $(DEBUG_FLAGS)
-EXECUTABLES = lda rmc wordcount ctools_test nlda nlda2 ocw gen_sv focw ntm
-HEADERS = lib/corpus.h lib/ct_hash.h lib/SparseCounts.h lib/word_hash.h lib/WordMap.h tools/lda.h tools/rmc.h lib/count_list.h lib/context_corpus.h vendor/include/progressbar.h tools/nlda.h vendor/include/statusbar.h tools/ntm.h lib/document_corpus.h
+EXECUTABLES = lda rmc wordcount ctools_test nlda nlda2 ocw gen_sv focw ntm cw
+HEADERS = lib/corpus.h lib/ct_hash.h lib/SparseCounts.h lib/word_hash.h lib/WordMap.h tools/lda.h tools/rmc.h lib/count_list.h lib/context_corpus.h vendor/include/progressbar.h tools/nlda.h vendor/include/statusbar.h tools/ntm.h lib/document_corpus.h tools/cw.h
 
 TEST := ${wildcard test/*.c}
 TEST_OBJ := ${foreach src,${TEST},${subst .c,.o, ${lastword ${subst /, ,${src}}}}}
@@ -176,6 +176,13 @@ double_hash.o: lib/double_hash.h lib/double_hash.c
 	
 ct_hash_print.o: lib/ct_hash_print.h lib/ct_hash_print.c
 	$(CC) -c $(CFLAGS) lib/ct_hash_print.c
+	
+CW_DEP = target_corpus.o WordMap.o progressbar.o statusbar.o cw.o unsigned_array.o word_hash.o LSH.o ct_hash.o double_hash.o ct_hash_print.o double_matrix.o
+cw: $(CW_DEP)
+	$(CC) $(LFLAGS) -lgsl $(CW_DEP) -o cw
+
+cw.o: tools/cw.h tools/cw.c
+	$(CC) -c $(CFLAGS) tools/cw.c
 
 # nTM target
 NTM_DEP = line_corpus.o WordMap.o progressbar.o statusbar.o ntm.o word_hash.o ct_hash.o ct_hash_print.o SparseCounts.o count_list.o unsigned_array.o

@@ -1,14 +1,5 @@
-/*
- *  focw.h
- *  corncob
- *
- *  Created by Trevor Fountain on 9/8/10.
- *  Copyright 2010 Expat Games. All rights reserved.
- *
- */
-
-#ifndef OCW_H
-#define OCW_H
+#ifndef CW_H
+#define CW_H
 
 #include "target_corpus.h"
 #include "unsigned_array.h"
@@ -26,14 +17,12 @@ typedef struct Pair_t
 
 typedef enum {TOP, VOTE, NEAREST} algorithm;
 
-typedef struct OCW_t
+typedef struct CW_t
 {
     // algorithm to use for updates
     algorithm update_method;
     // threshold for updating category assignments
     double threshold;
-    // Output current categorization per Nth document
-    unsigned int output_every_index;
 
     // The target corpus to use for training/testing
     target_corpus *corpus;
@@ -62,22 +51,19 @@ typedef struct OCW_t
     ct_hash *wordmap_to_target;
     
     // Cache PPMI vectors
-    unsigned int max_ppmi;
-    double_hash **cached_ppmi;
-} OCW;
+    double_hash *cached_ppmi[1000];
+} CW;
 
-OCW *OCW_new(char *filename, algorithm alg, double threshold, int interval);
-OCW *OCW_resume(char *focw_filename, char *corpus_filename, int document_index, algorithm alg, double threshold, int interval);
-void OCW_train(OCW *model);
-void OCW_free(OCW *model);
-void OCW_save_wordmap(OCW *model);
-void OCW_save_categorization(OCW *model);
-void OCW_save_representations(OCW *model);
-void OCW_save_meanings(OCW *model);
-void OCW_save_target_wordmap(OCW *model);
+CW *CW_new(char *filename, algorithm alg, double threshold);
+CW *CW_resume(char *focw_filename, char *corpus_filename, int document_index, algorithm alg, double threshold);
+void CW_train(CW *model);
+void CW_free(CW *model);
+void CW_save_wordmap(CW *model);
+void CW_save_categorization(CW *model);
+void CW_save_meanings(CW *model);
+void CW_save_target_wordmap(CW *model);
 void array_shuffle(Pair *array,unsigned int size);
-double_hash *OCW_update_ppmi_cache(OCW *model, int index);
-double_hash *OCW_ppmi(OCW *model,int target_index);
+double_hash *CW_ppmi(CW *model,int target_index);
 
 #endif
 

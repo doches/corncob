@@ -82,7 +82,7 @@ void nLDA_train_each_document(unsigned int *words, unsigned int length)
 void nLDA_dump(nLDA *model)
 {
     char filename[120];
-    sprintf(filename,"%s/%s.%d.%fa.%fb.%fg.focw",model->output_dir,model->corpus_filename,model->document_index,model->alpha,model->beta,model->gamma);
+    sprintf(filename,"%s/%s.%d.%fa.%fb.%fg.nlda",model->output_dir,model->corpus_filename,model->document_index,model->alpha,model->beta,model->gamma);
     printf("Saving categorization %s\n",filename);
     
 	Instance *instance = Instance_new(0,0,0,0,NULL);
