@@ -323,14 +323,9 @@ void OCW_each_document(unsigned int target, unsigned int *words, unsigned int le
     } else {
         // +target+ is a new word, so add it.
         index = static_ocw_model->num_targets++;
-        int category = static_ocw_model->num_categories++;
-        hash_add(static_ocw_model->wordmap_to_target, target, index);
-        unsigned_array_set(static_ocw_model->assignments, index, category);
-        static_ocw_model->targets[index] = hash_new(32);
         
         // If we're about to overflow the targets list, double it and copy over the old objects.
         if (index >= static_ocw_model->max_targets) {
-            
             int new_max_targets = static_ocw_model->max_targets*2;
             ct_hash **new_targets = (ct_hash **)malloc(sizeof(ct_hash *)*new_max_targets);
             
@@ -341,6 +336,11 @@ void OCW_each_document(unsigned int target, unsigned int *words, unsigned int le
             static_ocw_model->targets = new_targets;
             static_ocw_model->max_targets = new_max_targets;
         }
+        
+        int category = static_ocw_model->num_categories++;
+        hash_add(static_ocw_model->wordmap_to_target, target, index);
+        unsigned_array_set(static_ocw_model->assignments, index, category);
+        static_ocw_model->targets[index] = hash_new(32);
     }
     
     // Update the frequency counts for this target
