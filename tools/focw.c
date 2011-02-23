@@ -492,7 +492,7 @@ void OCW_save_wordmap(OCW *model)
 
 void OCW_save_categorization(OCW *model)
 {
-    char save_f[60];
+    char save_f[200];
     sprintf(save_f,"%s.%d.%s.focw",model->corpus_filename,model->document_index,OCW_method_str_map(model));
     printf("Saving categorization %s\n",save_f);
     FILE *fout = fopen(save_f,"w");
@@ -506,7 +506,7 @@ void OCW_save_categorization(OCW *model)
 FILE *static_save_file;
 void OCW_save_representations(OCW *model)
 {
-    char save_f[60];
+    char save_f[200];
     sprintf(save_f,"%s.%d.%s.reps",model->corpus_filename,model->document_index,OCW_method_str_map(model));
     printf("Saving raw counts %s\n",save_f);
 	static_save_file = fopen(save_f,"w");
@@ -524,7 +524,7 @@ void OCW_save_representations(OCW *model)
 
 void OCW_save_target_wordmap(OCW *model)
 {
-    char save_f[60];
+    char save_f[200];
     sprintf(save_f,"%s.%d.%s.wmt",model->corpus_filename,model->document_index,OCW_method_str_map(model));
     printf("Saving wordmap %s\n",save_f);
     hash_save(model->wordmap_to_target, save_f);
@@ -576,7 +576,7 @@ void OCW_ppmi_helper(hash_element *element)
 {
     // element = {key => context_word, value => f_ij}
     unsigned int f_ij = element->value;
-    
+
     hash_element *context_element = hash_get(static_ocw_model->context_counts, element->key);
     unsigned int f_xj = context_element->value;
     
