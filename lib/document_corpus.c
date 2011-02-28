@@ -15,7 +15,8 @@
 document_corpus_document *document_corpus_document_new(char *directory, char *filename)
 {
     document_corpus_document *new = (document_corpus_document *)malloc(sizeof(document_corpus_document));
-    new->filename = (char *)malloc(sizeof(char)*(strlen(directory)+2+strlen(filename)));
+    new->filename = (char *)malloc(sizeof(char)*100);
+    new->filename[0] = '\0';
     strcpy(new->filename,directory);
     strcat(new->filename,"/");
     strcat(new->filename,filename);
@@ -28,7 +29,8 @@ document_corpus *document_corpus_new(char *directory)
     document_corpus *new = (document_corpus *)malloc(sizeof(document_corpus));
     new->documents = NULL;
     new->wordmap = WordMap_new(1000);
-    new->filename = (char *)malloc(sizeof(char)*strlen(directory));
+    new->filename = (char *)malloc(sizeof(char)*100);
+    new->filename[0] = '\0';
     new->document_count = 0;
     strcpy(new->filename,directory);
     
@@ -115,3 +117,4 @@ void document_corpus_each_document(document_corpus *corpus, void (*document_call
         current_document = current_document->next;
     }
 }
+

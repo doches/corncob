@@ -1,7 +1,7 @@
 # Makefile for lda-c and assorted tools (int->int hash, string->int hash, sparsecount, etc.)
 
-CC = gcc
-OPTIMIZATION_FLAGS = -O1
+CC = gcc-4.3
+OPTIMIZATION_FLAGS = -O2
 DEBUG_FLAGS = 
 
 UNAME := $(shell uname)
